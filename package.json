@@ -1,0 +1,29 @@
+{
+  "name": "contracts",
+  "version": "1.0.0",
+  "description": "A smart contract module",
+  "main": "lib/index.ts",
+  "typess": "lib/index.d.ts",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "build": "tsc",
+    "deploy": "npx hardhat run scripts/deploy.ts --network ganache",
+    "build:typechain": "npx hardhat typechain",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "variable",
+  "license": "ISC",
+  "dependencies": {
+    "ethers": "^6.11.0",
+    "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@openzeppelin/contracts": "^5.0.1",
+    "@typechain/hardhat": "^9.1.0",
+    "@typechain/ethers-v6": "^0.5.1",
+    "typechain": "^8.3.2"
+  }
+}
