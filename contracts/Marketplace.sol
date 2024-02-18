@@ -5,15 +5,15 @@ import "./Counter.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Marketplace is ERC721URIStorage , Ownable {
+contract Marketplace is ERC721URIStorage, Ownable {
     Counter private _tokenIds;
     Counter private _itemSold;
-    
+
     // Listing fee percentage (default: 2%)
-    uint256 public listingFeePercentage = 2; 
+    uint256 public listingFeePercentage = 2;
 
     mapping(uint256 => MarketItem) public marketItemMap;
-    
+
     struct MarketItem {
         uint256 tokenId;
         address payable seller;
@@ -30,12 +30,10 @@ contract Marketplace is ERC721URIStorage , Ownable {
         bool sold
     );
 
-    constructor () ERC721("MARKETPLACE TOKEN","VAR") Ownable(msg.sender) {
-
-    }
+    constructor() ERC721("MARKETPLACE TOKEN", "VAR") Ownable(msg.sender) {}
 
     /* SET LISTING FEE PERCENTAGE */
-    function setListingFeePercentage(uint256 percentage)  external onlyOwner {
+    function setListingFeePercentage(uint256 percentage) external onlyOwner {
         listingFeePercentage = percentage;
     }
 
@@ -45,7 +43,10 @@ contract Marketplace is ERC721URIStorage , Ownable {
     }
 
     /* CREATE ERC721 TOKEN STANDARD FOR USER TO MINT NFT */
-    function mint(string memory tokenURI, uint256 price) external payable returns (uint256) {
+    function mint(
+        string memory tokenURI,
+        uint256 price
+    ) public payable returns (uint256) {
         _tokenIds.increment();
         uint256 tokenId = _tokenIds.count();
         _mint(msg.sender, tokenId);
@@ -56,8 +57,8 @@ contract Marketplace is ERC721URIStorage , Ownable {
     }
 
     /* CREATE TOKEN ON MARKETPLACE */
-    function marketItem(uint256 tokenId , uint256 price) private {
-        require(price > 0 , "PRICE MUST BE AT LEAST 1");
+    function marketItem(uint256 tokenId, uint256 price) private {
+        require(price > 0, "PRICE MUST BE AT LEAST 1");
         uint256 fee = (price * listingFeePercentage) / 100;
         require(msg.value >= fee, "INSUFFICIENT LISTING FEE");
 
@@ -69,7 +70,7 @@ contract Marketplace is ERC721URIStorage , Ownable {
             false
         );
 
-        _itemSold.increment();
+        _transfer(msg.sender, address(this), tokenId);
 
         emit MarketItemInit(
             tokenId,
@@ -81,7 +82,10 @@ contract Marketplace is ERC721URIStorage , Ownable {
     }
     /* RESELL TOKEN ON MARKETPLACE */
     function reSellItem(uint256 tokenId, uint256 price) public payable {
-        require(marketItemMap[tokenId].owner == msg.sender, "ONLY ITEM OWNER CAN PERFORM THIS OPERATION");
+        require(
+            marketItemMap[tokenId].owner == msg.sender,
+            "ONLY ITEM OWNER CAN PERFORM THIS OPERATION"
+        );
         uint256 fee = (price * listingFeePercentage) / 100;
         require(msg.value >= fee, "INSUFFICIENT LISTING FEE");
 
@@ -104,7 +108,10 @@ contract Marketplace is ERC721URIStorage , Ownable {
     function sellItem(uint256 tokenId) public payable {
         MarketItem storage item = marketItemMap[tokenId];
 
-        require(item.owner == msg.sender, "ONLY ITEM OWNER CAN PERFORM THIS OPERATION");
+        require(
+            item.owner == msg.sender,
+            "ONLY ITEM OWNER CAN PERFORM THIS OPERATION"
+        );
         require(msg.value == item.price, "PRICE MUST MATCH FOR OPERATION");
 
         item.sold = true;
@@ -113,9 +120,10 @@ contract Marketplace is ERC721URIStorage , Ownable {
         _transfer(address(this), msg.sender, tokenId);
 
         payable(owner()).transfer((msg.value * listingFeePercentage) / 100);
-        payable(item.seller).transfer(msg.value - ((msg.value * listingFeePercentage) / 100));
+        payable(item.seller).transfer(
+            msg.value - ((msg.value * listingFeePercentage) / 100)
+        );
     }
-
 
     /* FETCH MARKETPLACE ITEMS */
     function fetchMarketItem() public view returns (MarketItem[] memory) {
@@ -138,7 +146,7 @@ contract Marketplace is ERC721URIStorage , Ownable {
         for (uint256 i = 1; i <= _tokenIds.count(); i++) {
             if (marketItemMap[i].owner == msg.sender) {
                 count++;
-            } 
+            }
         }
 
         MarketItem[] memory items = new MarketItem[](count);
@@ -147,7 +155,7 @@ contract Marketplace is ERC721URIStorage , Ownable {
             if (marketItemMap[i].owner == msg.sender) {
                 items[index] = marketItemMap[i];
                 index++;
-            } 
+            }
         }
         return items;
     }
@@ -158,7 +166,7 @@ contract Marketplace is ERC721URIStorage , Ownable {
         for (uint256 i = 1; i <= _tokenIds.count(); i++) {
             if (marketItemMap[i].seller == msg.sender) {
                 count++;
-            } 
+            }
         }
 
         MarketItem[] memory items = new MarketItem[](count);
@@ -167,7 +175,7 @@ contract Marketplace is ERC721URIStorage , Ownable {
             if (marketItemMap[i].seller == msg.sender) {
                 items[index] = marketItemMap[i];
                 index++;
-            } 
+            }
         }
         return items;
     }
