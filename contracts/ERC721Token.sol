@@ -51,21 +51,4 @@ contract ERC721Token is ERC721TokenBlueprint {
         return _tokenURIs[tokenId];
     }
 
-    function _burn(uint256 tokenId) internal override {
-        super._burn(tokenId);
-        if (bytes(_tokenURIs[tokenId]).length != 0) {
-            delete _tokenURIs[tokenId];
-        }
-    }
-    /* 
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal virtual override {
-        super._beforeTokenTransfer(from, to, tokenId);
-        if (from == address(0)) {
-            _setTokenURI(tokenId, "");
-        }
-    } */
 }

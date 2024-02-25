@@ -2,80 +2,395 @@
 pragma solidity ^0.8.9;
 
 import "./blueprints/NFTMarketplaceBlueprint.sol";
+import "./NFTFactory.sol";
+pragma experimental ABIEncoderV2;
 
-contract NFTMarketplaceImpl is NFTMarketplaceBlueprint {
-    function listNFT(uint256 tokenId, uint256 price) external override {
-        require(
-            tokenIdToListing[tokenId].active == false,
-            "NFT already listed"
-        );
-        tokenIdToListing[tokenId] = Listing(msg.sender, tokenId, price, true);
+// 0xb5505da7407b330049ddc30b935b903672b1f42c
+contract NFTMarketplace is NFTMarketplaceBlueprint {
+    NFTFactory private immutable factory;
+
+
+    constructor(
+        uint256 _platformFee,
+        address _feeRecipient,
+        NFTFactory _factory
+    )  NFTMarketplaceBlueprint(_platformFee,_feeRecipient) {
+        factory = _factory;
     }
 
-    function startAuction(
-        uint256 tokenId,
-        uint256 startingPrice,
-        uint256 duration
-    ) external override {
-        require(
-            tokenIdToAuction[tokenId].active == false,
-            "Auction already started"
-        );
-        tokenIdToAuction[tokenId] = Auction({
+    modifier isNFT(address _nft) {
+        require(factory.isfactoryNFT(_nft), "NOT NFT");
+        _;
+    }
+
+    // @notice List NFT on Marketplace
+    function listNft(
+        address _nft,
+        uint256 _tokenId,
+        uint256 _price
+    ) external isNFT(_nft) {
+        IERC721 nft = IERC721(_nft);
+        require(nft.ownerOf(_tokenId) == msg.sender, "NOT NFT OWNER");
+        nft.transferFrom(msg.sender, address(this), _tokenId);
+
+        listNfts[_nft][_tokenId] = ListNFT({
+            nft: _nft,
+            tokenId: _tokenId,
             seller: msg.sender,
-            tokenId: tokenId,
-            startingPrice: startingPrice,
-            startTime: block.timestamp,
-            endTime: block.timestamp + duration,
-            highestBidder: address(0),
-            highestBid: startingPrice,
-            active: true
+            price: _price,
+            sold: false
         });
+
+        emit ListedNFT(_nft, _tokenId, _price, msg.sender);
     }
 
-    function bid(uint256 tokenId) external payable override {
-        Auction storage auction = tokenIdToAuction[tokenId];
-        require(auction.active == true, "Auction not active");
-        require(block.timestamp < auction.endTime, "Auction has ended");
-        require(
-            msg.value > auction.highestBid,
-            "Bid must be higher than current highest bid"
-        );
+    // @notice Cancel listed NFT
+    function cancelListedNFT(address _nft, uint256 _tokenId)
+        external
+        isListedNFT(_nft, _tokenId)
+    {
+        ListNFT memory listedNFT = listNfts[_nft][_tokenId];
+        require(listedNFT.seller == msg.sender, "NOT LISTED OWNER");
+        IERC721(_nft).transferFrom(address(this), msg.sender, _tokenId);
+        delete listNfts[_nft][_tokenId];
+    }
 
-        if (auction.highestBidder != address(0)) {
-            payable(auction.highestBidder).transfer(auction.highestBid);
+    // @notice Buy listed NFT
+    function buyNFT(
+        address _nft,
+        uint256 _tokenId
+    ) external payable isListedNFT(_nft, _tokenId)  {
+        ListNFT storage listedNft = listNfts[_nft][_tokenId];
+
+        require(!listedNft.sold, "NFT ALREADY SOLD");
+        require(msg.value >= listedNft.price, "INVALID PRICE");
+
+        listedNft.sold = true;
+        uint256 _price = msg.value;
+        uint256 totalPrice = _price;
+        NFT nft = NFT(listedNft.nft);
+        address royaltyRecipient = nft.getRoyaltyRecipient();
+        uint256 royaltyFee = nft.getRoyaltyFee();
+
+        if (royaltyFee > 0) {
+            uint256 royaltyTotal = calculateRoyalty(royaltyFee, _price);
+
+            // Transfer royalty fee to collection owner
+            payable(royaltyRecipient).transfer(royaltyTotal);
+            totalPrice -= royaltyTotal;
         }
 
-        auction.highestBidder = msg.sender;
-        auction.highestBid = msg.value;
+        // Calculate & Transfer platfrom fee
+        uint256 platformFeeTotal = calculatePlatformFee(_price);
+        payable(feeRecipient).transfer(platformFeeTotal);
+
+        totalPrice -= platformFeeTotal;
+        // Transfer to nft owner
+        payable(listedNft.seller).transfer(totalPrice);
+
+        // Transfer NFT to buyer
+        IERC721(listedNft.nft).safeTransferFrom(
+            address(this),
+            msg.sender,
+            listedNft.tokenId
+        );
+
+        emit BoughtNFT(
+            listedNft.nft,
+            listedNft.tokenId,
+            _price,
+            listedNft.seller,
+            msg.sender
+        );
     }
 
-    function endAuction(uint256 tokenId) external override {
-        Auction storage auction = tokenIdToAuction[tokenId];
-        require(auction.active == true, "Auction not active");
-        require(block.timestamp >= auction.endTime, "Auction not ended yet");
+    // @notice Offer listed NFT
+    function offerNFT(
+        address _nft,
+        uint256 _tokenId
+    ) external payable  isListedNFT(_nft, _tokenId) {
+        require(msg.value > 0, "PRICE CANNOT BE 0");
+        uint256 _offerPrice = msg.value;
 
-        if (auction.highestBidder != address(0)) {
-            payable(auction.seller).transfer(auction.highestBid);
+        ListNFT memory nft = listNfts[_nft][_tokenId];
+
+        offerNfts[_nft][_tokenId][msg.sender] = OfferNFT({
+            nft: nft.nft,
+            tokenId: nft.tokenId,
+            offerer: msg.sender,
+            offerPrice: _offerPrice,
+            accepted: false
+        });
+
+        emit OfferredNFT(
+            nft.nft,
+            nft.tokenId,
+            _offerPrice,
+            msg.sender
+        );
+    }
+
+    // @notice Offerer cancel offerring
+    function cancelOfferNFT(address _nft, uint256 _tokenId)
+        external
+        isOfferredNFT(_nft, _tokenId, msg.sender)
+    {
+        OfferNFT memory offer = offerNfts[_nft][_tokenId][msg.sender];
+        require(offer.offerer == msg.sender, "NOT OFFERER");
+        require(!offer.accepted, "OFFER ALREADY ACCEPTED");
+        delete offerNfts[_nft][_tokenId][msg.sender];
+        payable(offer.offerer).transfer(offer.offerPrice);
+        emit CanceledOfferredNFT(
+            offer.nft,
+            offer.tokenId,
+            offer.offerPrice,
+            msg.sender
+        );
+    }
+
+    // @notice listed NFT owner accept offerring
+    function acceptOfferNFT(
+        address _nft,
+        uint256 _tokenId,
+        address _offerer
+    )
+        external
+        isOfferredNFT(_nft, _tokenId, _offerer)
+        isListedNFT(_nft, _tokenId)
+    {
+        require(
+            listNfts[_nft][_tokenId].seller == msg.sender,
+            "NOT LISTED OWNER"
+        );
+        OfferNFT storage offer = offerNfts[_nft][_tokenId][_offerer];
+        ListNFT storage list = listNfts[offer.nft][offer.tokenId];
+        require(!list.sold, "ALREADY SOLD");
+        require(!offer.accepted, "OFFER ALREADY ACCEPTED");
+
+        list.sold = true;
+        offer.accepted = true;
+
+        uint256 offerPrice = offer.offerPrice;
+        uint256 totalPrice = offerPrice;
+
+        NFT nft = NFT(offer.nft);
+        address royaltyRecipient = nft.getRoyaltyRecipient();
+        uint256 royaltyFee = nft.getRoyaltyFee();
+
+        if (royaltyFee > 0) {
+            uint256 royaltyTotal = calculateRoyalty(royaltyFee, offerPrice);
+
+            // Transfer royalty fee to collection owner
+            payable(royaltyRecipient).transfer(royaltyTotal);
+            totalPrice -= royaltyTotal;
         }
 
-        tokenIdToListing[tokenId] = Listing(
-            auction.highestBidder,
-            tokenId,
-            auction.highestBid,
-            true
+        // Calculate & Transfer platfrom fee
+        uint256 platformFeeTotal = calculatePlatformFee(offerPrice);
+        payable(feeRecipient).transfer(platformFeeTotal);
+        totalPrice -= platformFeeTotal;
+
+        // Transfer to seller
+        payable(list.seller).transfer(totalPrice);
+
+        // Transfer NFT to offerer
+        IERC721(list.nft).safeTransferFrom(
+            address(this),
+            offer.offerer,
+            list.tokenId
         );
-        delete tokenIdToAuction[tokenId];
+
+        emit AcceptedNFT(
+            offer.nft,
+            offer.tokenId,
+            offer.offerPrice,
+            offer.offerer,
+            list.seller
+        );
     }
 
-    function cancelListing(uint256 tokenId) external override {
-        Listing memory listing = tokenIdToListing[tokenId];
-        require(listing.active == true, "NFT not listed");
+    // @notice Create autcion
+    function createAuction(
+        address _nft,
+        uint256 _tokenId,
+        uint256 _price,
+        uint256 _minBid,
+        uint256 _startTime,
+        uint256 _endTime
+    ) external isNotAuction(_nft, _tokenId) {
+        IERC721 nft = IERC721(_nft);
+        require(nft.ownerOf(_tokenId) == msg.sender, "NOT NFT OWNER");
+        require(_endTime > _startTime, "INVALID END TIME");
+
+        nft.transferFrom(msg.sender, address(this), _tokenId);
+
+        auctionNfts[_nft][_tokenId] = AuctionNFT({
+            nft: _nft,
+            tokenId: _tokenId,
+            creator: msg.sender,
+            initialPrice: _price,
+            minBid: _minBid,
+            startTime: _startTime,
+            endTime: _endTime,
+            lastBidder: address(0),
+            heighestBid: _price,
+            winner: address(0),
+            success: false
+        });
+
+        emit CreatedAuction(
+            _nft,
+            _tokenId,
+            _price,
+            _minBid,
+            _startTime,
+            _endTime,
+            msg.sender
+        );
+    }
+
+    // @notice Cancel auction
+    function cancelAuction(address _nft, uint256 _tokenId)
+        external
+        isAuction(_nft, _tokenId)
+    {
+        AuctionNFT memory auction = auctionNfts[_nft][_tokenId];
+        require(auction.creator == msg.sender, "NOT AUCTION CREATOR");
+        require(block.timestamp < auction.startTime, "AUCTION ALREADY STARTED");
+        require(auction.lastBidder == address(0), "ALREADY HAVE BIDDER");
+
+        IERC721 nft = IERC721(_nft);
+        nft.transferFrom(address(this), msg.sender, _tokenId);
+        delete auctionNfts[_nft][_tokenId];
+    }
+
+    // @notice Bid place auction
+    function bidPlace(
+        address _nft,
+        uint256 _tokenId
+    ) external payable isAuction(_nft, _tokenId) {
         require(
-            msg.sender == listing.seller,
-            "Only seller can cancel the listing"
+            block.timestamp >= auctionNfts[_nft][_tokenId].startTime,
+            "AUCTION NOT START"
+        );
+        require(
+            block.timestamp <= auctionNfts[_nft][_tokenId].endTime,
+            "AUCTION ENDED"
+        );
+        require(
+            msg.value >=
+                auctionNfts[_nft][_tokenId].heighestBid +
+                    auctionNfts[_nft][_tokenId].minBid,
+            "LESS THAN MINIMUM BID PRICE"
         );
 
-        delete tokenIdToListing[tokenId];
+        uint256 _bidPrice = msg.value;
+
+        AuctionNFT storage auction = auctionNfts[_nft][_tokenId];
+       
+        if (auction.lastBidder != address(0)) {
+            address lastBidder = auction.lastBidder;
+            uint256 lastBidPrice = auction.heighestBid;
+
+            // Transfer back to last bidder
+            payable (lastBidder).transfer(lastBidPrice);
+        }
+
+        // Set new heighest bid price
+        auction.lastBidder = msg.sender;
+        auction.heighestBid = _bidPrice;
+
+        emit PlacedBid(_nft, _tokenId, _bidPrice, msg.sender);
+    }
+
+    // @notice Result auction, can call by auction creator, heighest bidder, or marketplace owner only!
+    function resultAuction(address _nft, uint256 _tokenId) external {
+        require(!auctionNfts[_nft][_tokenId].success, "ALREADY RESULTED");
+        require(
+            msg.sender == owner() ||
+                msg.sender == auctionNfts[_nft][_tokenId].creator ||
+                msg.sender == auctionNfts[_nft][_tokenId].lastBidder,
+            "NOT CREATOR , OWNER OR WINNER"
+        );
+        require(
+            block.timestamp > auctionNfts[_nft][_tokenId].endTime,
+            "AUCTION NOT ENDED"
+        );
+
+        AuctionNFT storage auction = auctionNfts[_nft][_tokenId];
+
+        IERC721 nft = IERC721(auction.nft);
+
+        auction.success = true;
+        auction.winner = auction.creator;
+
+        NFT Nft = NFT(_nft);
+        address royaltyRecipient = Nft.getRoyaltyRecipient();
+        uint256 royaltyFee = Nft.getRoyaltyFee();
+
+        uint256 heighestBid = auction.heighestBid;
+        uint256 totalPrice = heighestBid;
+
+        if (royaltyFee > 0) {
+            uint256 royaltyTotal = calculateRoyalty(royaltyFee, heighestBid);
+
+            // Transfer royalty fee to collection owner
+            payable (royaltyRecipient).transfer(royaltyTotal);
+            totalPrice -= royaltyTotal;
+        }
+
+        // Calculate & Transfer platfrom fee
+        uint256 platformFeeTotal = calculatePlatformFee(heighestBid);
+        payable(feeRecipient).transfer(platformFeeTotal);
+        totalPrice -= platformFeeTotal;
+        
+        // Transfer to auction creator
+        payable(auction.creator).transfer(totalPrice);
+
+        // Transfer NFT to the winner
+        nft.transferFrom(address(this), auction.lastBidder, auction.tokenId);
+
+        emit ResultedAuction(
+            _nft,
+            _tokenId,
+            auction.creator,
+            auction.lastBidder,
+            auction.heighestBid,
+            msg.sender
+        );
+    }
+
+    function calculatePlatformFee(uint256 _price)
+        public
+        view
+        returns (uint256)
+    {
+        return (_price * platformFee) / 10000;
+    }
+
+    function calculateRoyalty(uint256 _royalty, uint256 _price)
+        public
+        pure
+        returns (uint256)
+    {
+        return (_price * _royalty) / 10000;
+    }
+
+    function getListedNFT(address _nft, uint256 _tokenId)
+        public
+        view
+        returns (ListNFT memory)
+    {
+        return listNfts[_nft][_tokenId];
+    }
+
+    function updatePlatformFee(uint256 _platformFee) external onlyOwner {
+        require(_platformFee <= 10000, "CANNOT MORE THAT 10%");
+        platformFee = _platformFee;
+    }
+
+    function changeFeeRecipient(address _feeRecipient) external onlyOwner {
+        require(_feeRecipient != address(0), "CANNOT BE ADDRESS 0");
+        feeRecipient = _feeRecipient;
     }
 }
