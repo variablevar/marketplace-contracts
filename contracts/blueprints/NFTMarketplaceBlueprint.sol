@@ -5,11 +5,34 @@ pragma solidity ^0.8.9;
 import "./ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 abstract contract NFTMarketplaceBlueprint is Ownable, ReentrancyGuard {
     uint256 internal platformFee;
     address internal feeRecipient;
+
+    string constant NOT_NFT = "NOT NFT";
+    string constant NOT_LISTED = "NOT LISTED";
+    string constant ALREADY_LISTED = "ALREADY LISTED";
+    string constant NOT_NFT_OWNER = "NOT NFT OWNER";
+    string constant NOT_LISTED_OWNER = "NOT LISTED OWNER";
+    string constant NFT_ALREADY_SOLD = "NFT ALREADY SOLD";
+    string constant INVALID_PRICE = "INVALID PRICE";
+    string constant NOT_ZERO_PRICE = "PRICE CANNOT BE 0";
+    string constant NOT_OFFERER = "NOT OFFERER";
+    string constant OFFER_ALREADY_ACCEPTED = "OFFER ALREADY ACCEPTED";
+    string constant INVALID_TIME = "INVALID END TIME";
+    string constant NOT_AUCTION_CREATOR = "NOT AUCTION CREATOR";
+    string constant AUCTION_ALREADY_CREATED = "AUCTION ALREADY CREATED";
+    string constant AUCTION_ALREADY_STARTED = "AUCTION ALREADY STARTED";
+    string constant ALREADY_HAVE_BIDDER = "ALREADY HAVE BIDDER";
+    string constant AUCTION_NOT_START = "AUCTION NOT START";
+    string constant AUCTION_ENDED = "AUCTION ENDED";
+    string constant NOT_CREATOR_OWNER_OR_WINNER = "NOT CREATOR , OWNER OR WINNER";
+    string constant AUCTION_NOT_ENDED = "AUCTION NOT ENDED";
+    string constant CANNOT_MORE_THAT_10 = "CANNOT MORE THAT 10%";
+    string constant CANNOT_BE_ADDRESS_0 = "CANNOT BE ADDRESS 0";
+    string constant NOT_OFFERERED_NFT = "NOT OFFERERED NFT";
+    string constant LESS_THAN_MINIMUM_BID_PRICE = "LESS THAN MINIMUM BID PRICE";
 
     struct ListNFT {
         address nft;
@@ -41,7 +64,6 @@ abstract contract NFTMarketplaceBlueprint is Ownable, ReentrancyGuard {
         bool success;
     }
 
-    mapping(address => bool) internal payableToken;
     address[] internal tokens;
 
     // nft => tokenId => list struct
@@ -119,7 +141,7 @@ abstract contract NFTMarketplaceBlueprint is Ownable, ReentrancyGuard {
         uint256 _platformFee,
         address _feeRecipient
     )  Ownable(msg.sender){
-        require(_platformFee <= 10000, "CAN'T MORE THAN 10%");
+        require(_platformFee <= 10000, CANNOT_MORE_THAT_10);
         platformFee = _platformFee;
         feeRecipient = _feeRecipient;
     }
@@ -129,7 +151,7 @@ abstract contract NFTMarketplaceBlueprint is Ownable, ReentrancyGuard {
         ListNFT memory listedNFT = listNfts[_nft][_tokenId];
         require(
             listedNFT.seller != address(0) && !listedNFT.sold,
-            "NOT LISTED"
+            NOT_LISTED
         );
         _;
     }
@@ -138,7 +160,7 @@ abstract contract NFTMarketplaceBlueprint is Ownable, ReentrancyGuard {
         ListNFT memory listedNFT = listNfts[_nft][_tokenId];
         require(
             listedNFT.seller == address(0) || listedNFT.sold,
-            "already listed"
+            ALREADY_LISTED
         );
         _;
     }
@@ -147,7 +169,7 @@ abstract contract NFTMarketplaceBlueprint is Ownable, ReentrancyGuard {
         AuctionNFT memory auction = auctionNfts[_nft][_tokenId];
         require(
             auction.nft != address(0) && !auction.success,
-            "auction already created"
+            AUCTION_ALREADY_CREATED
         );
         _;
     }
@@ -156,7 +178,7 @@ abstract contract NFTMarketplaceBlueprint is Ownable, ReentrancyGuard {
         AuctionNFT memory auction = auctionNfts[_nft][_tokenId];
         require(
             auction.nft == address(0) || auction.success,
-            "auction already created"
+            AUCTION_ALREADY_CREATED
         );
         _;
     }
@@ -169,7 +191,7 @@ abstract contract NFTMarketplaceBlueprint is Ownable, ReentrancyGuard {
         OfferNFT memory offer = offerNfts[_nft][_tokenId][_offerer];
         require(
             offer.offerPrice > 0 && offer.offerer != address(0),
-            "not offerred nft"
+            NOT_OFFERERED_NFT
         );
         _;
     }

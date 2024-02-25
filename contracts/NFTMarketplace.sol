@@ -5,10 +5,8 @@ import "./blueprints/NFTMarketplaceBlueprint.sol";
 import "./NFTFactory.sol";
 pragma experimental ABIEncoderV2;
 
-// 0xb5505da7407b330049ddc30b935b903672b1f42c
 contract NFTMarketplace is NFTMarketplaceBlueprint {
     NFTFactory private immutable factory;
-
 
     constructor(
         uint256 _platformFee,
@@ -19,7 +17,7 @@ contract NFTMarketplace is NFTMarketplaceBlueprint {
     }
 
     modifier isNFT(address _nft) {
-        require(factory.isfactoryNFT(_nft), "NOT NFT");
+        require(factory.isfactoryNFT(_nft), NOT_NFT);
         _;
     }
 
@@ -30,7 +28,7 @@ contract NFTMarketplace is NFTMarketplaceBlueprint {
         uint256 _price
     ) external isNFT(_nft) {
         IERC721 nft = IERC721(_nft);
-        require(nft.ownerOf(_tokenId) == msg.sender, "NOT NFT OWNER");
+        require(nft.ownerOf(_tokenId) == msg.sender, NOT_NFT_OWNER);
         nft.transferFrom(msg.sender, address(this), _tokenId);
 
         listNfts[_nft][_tokenId] = ListNFT({
@@ -50,7 +48,7 @@ contract NFTMarketplace is NFTMarketplaceBlueprint {
         isListedNFT(_nft, _tokenId)
     {
         ListNFT memory listedNFT = listNfts[_nft][_tokenId];
-        require(listedNFT.seller == msg.sender, "NOT LISTED OWNER");
+        require(listedNFT.seller == msg.sender,NOT_LISTED_OWNER);
         IERC721(_nft).transferFrom(address(this), msg.sender, _tokenId);
         delete listNfts[_nft][_tokenId];
     }
@@ -62,8 +60,8 @@ contract NFTMarketplace is NFTMarketplaceBlueprint {
     ) external payable isListedNFT(_nft, _tokenId)  {
         ListNFT storage listedNft = listNfts[_nft][_tokenId];
 
-        require(!listedNft.sold, "NFT ALREADY SOLD");
-        require(msg.value >= listedNft.price, "INVALID PRICE");
+        require(!listedNft.sold, NFT_ALREADY_SOLD);
+        require(msg.value >= listedNft.price, INVALID_PRICE);
 
         listedNft.sold = true;
         uint256 _price = msg.value;
@@ -109,7 +107,7 @@ contract NFTMarketplace is NFTMarketplaceBlueprint {
         address _nft,
         uint256 _tokenId
     ) external payable  isListedNFT(_nft, _tokenId) {
-        require(msg.value > 0, "PRICE CANNOT BE 0");
+        require(msg.value > 0, NOT_ZERO_PRICE);
         uint256 _offerPrice = msg.value;
 
         ListNFT memory nft = listNfts[_nft][_tokenId];
@@ -136,8 +134,8 @@ contract NFTMarketplace is NFTMarketplaceBlueprint {
         isOfferredNFT(_nft, _tokenId, msg.sender)
     {
         OfferNFT memory offer = offerNfts[_nft][_tokenId][msg.sender];
-        require(offer.offerer == msg.sender, "NOT OFFERER");
-        require(!offer.accepted, "OFFER ALREADY ACCEPTED");
+        require(offer.offerer == msg.sender, NOT_OFFERER);
+        require(!offer.accepted, OFFER_ALREADY_ACCEPTED);
         delete offerNfts[_nft][_tokenId][msg.sender];
         payable(offer.offerer).transfer(offer.offerPrice);
         emit CanceledOfferredNFT(
@@ -160,12 +158,12 @@ contract NFTMarketplace is NFTMarketplaceBlueprint {
     {
         require(
             listNfts[_nft][_tokenId].seller == msg.sender,
-            "NOT LISTED OWNER"
+            NOT_LISTED_OWNER
         );
         OfferNFT storage offer = offerNfts[_nft][_tokenId][_offerer];
         ListNFT storage list = listNfts[offer.nft][offer.tokenId];
-        require(!list.sold, "ALREADY SOLD");
-        require(!offer.accepted, "OFFER ALREADY ACCEPTED");
+        require(!list.sold,NFT_ALREADY_SOLD );
+        require(!offer.accepted, OFFER_ALREADY_ACCEPTED);
 
         list.sold = true;
         offer.accepted = true;
@@ -219,8 +217,8 @@ contract NFTMarketplace is NFTMarketplaceBlueprint {
         uint256 _endTime
     ) external isNotAuction(_nft, _tokenId) {
         IERC721 nft = IERC721(_nft);
-        require(nft.ownerOf(_tokenId) == msg.sender, "NOT NFT OWNER");
-        require(_endTime > _startTime, "INVALID END TIME");
+        require(nft.ownerOf(_tokenId) == msg.sender, NOT_NFT_OWNER);
+        require(_endTime > _startTime, INVALID_TIME);
 
         nft.transferFrom(msg.sender, address(this), _tokenId);
 
@@ -255,9 +253,9 @@ contract NFTMarketplace is NFTMarketplaceBlueprint {
         isAuction(_nft, _tokenId)
     {
         AuctionNFT memory auction = auctionNfts[_nft][_tokenId];
-        require(auction.creator == msg.sender, "NOT AUCTION CREATOR");
-        require(block.timestamp < auction.startTime, "AUCTION ALREADY STARTED");
-        require(auction.lastBidder == address(0), "ALREADY HAVE BIDDER");
+        require(auction.creator == msg.sender, NOT_AUCTION_CREATOR);
+        require(block.timestamp < auction.startTime, AUCTION_ALREADY_STARTED);
+        require(auction.lastBidder == address(0), ALREADY_HAVE_BIDDER);
 
         IERC721 nft = IERC721(_nft);
         nft.transferFrom(address(this), msg.sender, _tokenId);
@@ -271,17 +269,17 @@ contract NFTMarketplace is NFTMarketplaceBlueprint {
     ) external payable isAuction(_nft, _tokenId) {
         require(
             block.timestamp >= auctionNfts[_nft][_tokenId].startTime,
-            "AUCTION NOT START"
+            AUCTION_NOT_START
         );
         require(
             block.timestamp <= auctionNfts[_nft][_tokenId].endTime,
-            "AUCTION ENDED"
+            AUCTION_ENDED
         );
         require(
             msg.value >=
                 auctionNfts[_nft][_tokenId].heighestBid +
                     auctionNfts[_nft][_tokenId].minBid,
-            "LESS THAN MINIMUM BID PRICE"
+            LESS_THAN_MINIMUM_BID_PRICE
         );
 
         uint256 _bidPrice = msg.value;
@@ -305,16 +303,16 @@ contract NFTMarketplace is NFTMarketplaceBlueprint {
 
     // @notice Result auction, can call by auction creator, heighest bidder, or marketplace owner only!
     function resultAuction(address _nft, uint256 _tokenId) external {
-        require(!auctionNfts[_nft][_tokenId].success, "ALREADY RESULTED");
+        require(!auctionNfts[_nft][_tokenId].success,AUCTION_ENDED);
         require(
             msg.sender == owner() ||
                 msg.sender == auctionNfts[_nft][_tokenId].creator ||
                 msg.sender == auctionNfts[_nft][_tokenId].lastBidder,
-            "NOT CREATOR , OWNER OR WINNER"
+            NOT_CREATOR_OWNER_OR_WINNER
         );
         require(
             block.timestamp > auctionNfts[_nft][_tokenId].endTime,
-            "AUCTION NOT ENDED"
+            AUCTION_NOT_ENDED
         );
 
         AuctionNFT storage auction = auctionNfts[_nft][_tokenId];
@@ -385,12 +383,12 @@ contract NFTMarketplace is NFTMarketplaceBlueprint {
     }
 
     function updatePlatformFee(uint256 _platformFee) external onlyOwner {
-        require(_platformFee <= 10000, "CANNOT MORE THAT 10%");
+        require(_platformFee <= 10000, CANNOT_MORE_THAT_10);
         platformFee = _platformFee;
     }
 
     function changeFeeRecipient(address _feeRecipient) external onlyOwner {
-        require(_feeRecipient != address(0), "CANNOT BE ADDRESS 0");
+        require(_feeRecipient != address(0), CANNOT_BE_ADDRESS_0);
         feeRecipient = _feeRecipient;
     }
 }

@@ -15,8 +15,9 @@ async function main() {
   );
 
   /* 
-  NFT Factory Deployed at 0xb204db9F6799e190a4bf7Af130F838ea5Bd98bC8
-  NFT Marketplace Deployed at 0x7CA25CB61E4B886412f26Bf1e00A7DF3A3939633
+  NFT DEPLOYMENT 0x828C4EE9C418870E2Fa87e7666E0dbe847CB5C39
+  NFT Factory Deployed at 0x701c575106928739AFa9d59f2138f15FA12C9494
+  NFT Marketplace Deployed at 0x217C80b6fAEB914DE6d9170350F17b054b2dFBe6
   */
   console.log(`NFT Factory Deployed at ${factoryAddress}`);
   console.log(`NFT Marketplace Deployed at ${marketplaceAddress}`);
