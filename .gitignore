@@ -1,7 +1,7 @@
 node_modules
 .env
 # testing
-/.nyc_output
+/.nyc_output/
 # build
 /build
 
