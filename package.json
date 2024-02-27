@@ -11,7 +11,7 @@
     "build": "tsc",
     "deploy": "npx hardhat run scripts/deploy.ts --network ganache",
     "build:typechain": "npx hardhat typechain",
-    "test": "nyc mocha -r ts-node/register test/marketplace/mint.test.ts --timeout 250000 --exit"
+    "test": "nyc mocha -r ts-node/register test/marketplace/marketplace.test.ts --timeout 250000 --exit"
   },
   "author": "variable",
   "license": "ISC",
@@ -23,6 +23,7 @@
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
     "@openzeppelin/contracts": "^5.0.1",
     "@typechain/hardhat": "^9.1.0",
+    "mocha": "^10.3.0",
     "nyc": "^15.1.0",
     "typechain": "^8.3.2"
   }

@@ -64,21 +64,19 @@ abstract contract NFTMarketplaceBlueprint is Ownable, ReentrancyGuard {
         bool success;
     }
 
-    address[] internal tokens;
-
     // nft => tokenId => list struct
-    mapping(address => mapping(uint256 => ListNFT)) internal listNfts;
+    mapping(address => mapping(uint256 => ListNFT)) public listNfts;
 
     // nft => tokenId => offerer address => offer struct
     mapping(address => mapping(uint256 => mapping(address => OfferNFT)))
-        internal offerNfts;
+        public offerNfts;
 
     // nft => tokenId => auction struct
-    mapping(address => mapping(uint256 => AuctionNFT)) internal auctionNfts;
+    mapping(address => mapping(uint256 => AuctionNFT)) public auctionNfts;
 
     // auction index => bidding counts => bidder address => bid price
-    mapping(uint256 => mapping(uint256 => mapping(address => uint256)))
-        internal bidPrices;
+    mapping(address => mapping(uint256 => mapping(address => uint256)))
+        public bidPrices;
 
     // events
     event ListedNFT(

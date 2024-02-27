@@ -297,6 +297,7 @@ contract NFTMarketplace is NFTMarketplaceBlueprint {
         // Set new heighest bid price
         auction.lastBidder = msg.sender;
         auction.heighestBid = _bidPrice;
+        bidPrices[_nft][_tokenId][msg.sender]= _bidPrice;
 
         emit PlacedBid(_nft, _tokenId, _bidPrice, msg.sender);
     }
