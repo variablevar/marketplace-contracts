@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
+import "./blueprints/ReentrancyGuard.sol";
 import "./blueprints/NFTMarketplaceBlueprint.sol";
 import "./NFTFactory.sol";
+
 pragma experimental ABIEncoderV2;
 
-contract NFTMarketplace is NFTMarketplaceBlueprint {
+contract NFTMarketplace is NFTMarketplaceBlueprint , ReentrancyGuard{
     NFTFactory private immutable factory;
 
     constructor(

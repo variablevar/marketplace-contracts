@@ -16,7 +16,7 @@ function toWei(value: number) {
   return ethers.parseEther(value.toString());
 }
 
-describe("Marketplace", () => {
+describe("INTEGRATION", () => {
   let nft: NFT;
   let NFT_ADDRESS: string | Addressable;
   let factory: NFTFactory;
@@ -27,7 +27,8 @@ describe("Marketplace", () => {
   let creator: Signer;
   let buyer: Signer;
   let offerer: Signer;
-  let bidder: Signer;
+  let bidder1: Signer;
+  let bidder2: Signer;
   const COLLECTION_NAME = "DEBIAN";
   const COLLECTION_SYMBOL = "DEB";
   const PLATFORM_FEE: BigNumberish = 7;
@@ -60,7 +61,8 @@ describe("Marketplace", () => {
   ];
 
   before(async () => {
-    [owner, creator, buyer, offerer, bidder] = await ethers.getSigners();
+    [owner, creator, buyer, offerer, bidder1, bidder2] =
+      await ethers.getSigners();
     const Factory = new NFTFactory__factory(owner);
     factory = await Factory.deploy();
     await factory.waitForDeployment();
@@ -196,13 +198,32 @@ describe("Marketplace", () => {
     });
     /*  */
   });
-
   describe("MARKETPLACE", () => {
-    it("IT SHOULD ALLOW USER TO LIST NFT", async () => {
+    it("IT SHOULD APPROVE NFT TO MARKETPLACE", async () => {
+      const CREATOR_ADDRESS = await creator.getAddress();
+      for (let index = 0; index < 10; index++) {
+        const tx = await nft
+          .connect(creator)
+          .approve(MARKETPLACE_ADDRESS, NFT_TOKENS[index]);
+        await tx.wait();
+      }
+      for (let index = 0; index < 10; index++) {
+        const approved = await nft.getApproved(NFT_TOKENS[index]);
+        expect(approved).to.be.equal(MARKETPLACE_ADDRESS);
+      }
+    });
+    it("IT SHOULD LIST THE NFT TO MARKETPLACE", async () => {
+      const EVENT_NAME = 'ListedNFT';
+      const event = marketplace.getEvent(EVENT_NAME,()=>{});
+
+      marketplace.on(event, function(nfts,tokenId,price,seller){
+
+      });
       for (let index = 0; index < 10; index++) {
         const tx = await marketplace
           .connect(creator)
           .listNft(NFT_ADDRESS, NFT_TOKENS[index], NFT_PRICES[index]);
+        await tx.wait();
       }
     });
   });

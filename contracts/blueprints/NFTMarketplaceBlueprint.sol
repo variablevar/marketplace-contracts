@@ -2,11 +2,10 @@
 
 pragma solidity ^0.8.9;
 
-import "./ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-abstract contract NFTMarketplaceBlueprint is Ownable, ReentrancyGuard {
+abstract contract NFTMarketplaceBlueprint is Ownable {
     uint256 internal platformFee;
     address internal feeRecipient;
 

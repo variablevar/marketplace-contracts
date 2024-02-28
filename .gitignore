@@ -12,6 +12,9 @@ node_modules
 /typechain
 /typechain-types
 
+/contracts/.deps
+/contracts/artifacts
+
 # solidity-coverage files
 /coverage
 /coverage.json
