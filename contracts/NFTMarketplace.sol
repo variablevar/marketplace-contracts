@@ -131,20 +131,20 @@ contract NFTMarketplace is NFTMarketplaceBlueprint , ReentrancyGuard{
     }
 
     // @notice Offerer cancel offerring
-    function cancelOfferNFT(address _nft, uint256 _tokenId)
+    function cancelOfferNFT(address _nft, uint256 _tokenId,address _offerer)
         external
-        isOfferredNFT(_nft, _tokenId, msg.sender)
+        isOfferredNFT(_nft, _tokenId, _offerer)
     {
-        OfferNFT memory offer = offerNfts[_nft][_tokenId][msg.sender];
-        require(offer.offerer == msg.sender, NOT_OFFERER);
+        OfferNFT memory offer = offerNfts[_nft][_tokenId][_offerer];
+        require(offer.offerer == _offerer, NOT_OFFERER);
         require(!offer.accepted, OFFER_ALREADY_ACCEPTED);
-        delete offerNfts[_nft][_tokenId][msg.sender];
+        delete offerNfts[_nft][_tokenId][_offerer];
         payable(offer.offerer).transfer(offer.offerPrice);
         emit CanceledOfferredNFT(
             offer.nft,
             offer.tokenId,
             offer.offerPrice,
-            msg.sender
+            _offerer
         );
     }
 
