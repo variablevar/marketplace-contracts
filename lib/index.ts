@@ -1,3 +1,1 @@
-import { MarketplaceContract } from './Marketplace';
-export { MarketplaceContract };
-
+export { NFTFactoryContract, NFTMarketplaceContract } from "./contracts";
