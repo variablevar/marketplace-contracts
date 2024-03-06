@@ -18,6 +18,8 @@ describe("Marketplace", () => {
 
   const COLLECTION_NAME = "DEBIAN";
   const COLLECTION_SYMBOL = "DEB";
+  const COLLECTION_IMAGE = "http://image/";
+
   const PLATFORM_FEE: BigNumberish = 7;
   let ROYALTY_FEE: BigNumberish = 2;
 
@@ -54,6 +56,7 @@ describe("Marketplace", () => {
     nft = await NFT.deploy(
       COLLECTION_NAME,
       COLLECTION_SYMBOL,
+      COLLECTION_IMAGE,
       CREATOR_ADDRESS,
       ROYALTY_FEE,
       CREATOR_ADDRESS

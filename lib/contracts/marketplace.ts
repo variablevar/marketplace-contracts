@@ -1,7 +1,7 @@
 import { NFTMarketplace, NFTMarketplace__factory } from "../../typechain-types";
-import { FACTORY_ADDRESS } from "../constants/address";
+import { MARKETPLACE_ADDRESS } from "../constants/address";
 
 const factory = new NFTMarketplace__factory();
 export const NFTMarketplaceContract = factory.attach(
-  FACTORY_ADDRESS
+  MARKETPLACE_ADDRESS
 ) as NFTMarketplace;

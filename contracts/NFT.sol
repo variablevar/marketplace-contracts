@@ -12,11 +12,13 @@ contract NFT is ERC721URIStorage, Ownable {
     Counters.Counter private _tokenIdCounter;
 
     uint256 private royaltyFee;
+    string public imageURI;
     address private royaltyRecipient;
 
     constructor(
         string memory _name,
         string memory _symbol,
+        string memory _imageURI,
         address _owner,
         uint256 _royaltyFee,
         address _royaltyRecipient
@@ -25,6 +27,7 @@ contract NFT is ERC721URIStorage, Ownable {
         require(_royaltyRecipient != address(0));
         royaltyFee = _royaltyFee;
         royaltyRecipient = _royaltyRecipient;
+        imageURI = _imageURI;
         transferOwnership(_owner);
     }
 

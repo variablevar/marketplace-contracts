@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "A smart contract module",
   "main": "lib/index.ts",
-  "typess": "lib/index.d.ts",
   "directories": {
     "test": "test"
   },
   "scripts": {
+    "start": "ts-node lib/service.ts",
     "build": "tsc",
     "deploy": "npx hardhat run scripts/deploy.ts --network ganache",
     "build:typechain": "npx hardhat typechain",
@@ -16,7 +16,10 @@
   "author": "variable",
   "license": "ISC",
   "dependencies": {
+    "@types/mongoose": "^5.11.97",
     "dotenv": "^16.4.5",
+    "mongoose": "^8.2.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   },
   "devDependencies": {

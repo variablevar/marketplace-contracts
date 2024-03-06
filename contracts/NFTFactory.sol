@@ -12,25 +12,28 @@ contract NFTFactory {
         address creator,
         address nft,
         string name,
+        string image,
         string symbol
     );
 
     function createNFTCollection(
         string memory _name,
         string memory _symbol,
+        string memory _image,
         uint256 _royaltyFee,
         address _royaltyRecipient
     ) external {
         NFT nft = new NFT(
             _name,
             _symbol,
+            _image,
             msg.sender,
             _royaltyFee,
             _royaltyRecipient
         );
         nfts[msg.sender].push(address(nft));
         factoryNFT[address(nft)] = true;
-        emit CreatedNFTCollection(msg.sender, address(nft), _name, _symbol);
+        emit CreatedNFTCollection(msg.sender, address(nft), _name,_image, _symbol);
     }
 
     function getOwnCollections() external view returns (address[] memory) {

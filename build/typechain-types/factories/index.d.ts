@@ -1,1 +1,2 @@
-export { Lock__factory } from "./Lock__factory";
+export * as openzeppelin from "./@openzeppelin";
+export * as contracts from "./contracts";

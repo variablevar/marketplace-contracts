@@ -1,8 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 require("@nomicfoundation/hardhat-toolbox");
+const dotenv_1 = require("dotenv");
+(0, dotenv_1.config)();
 const config = {
-    solidity: "0.8.20",
+    solidity: {
+        version: "0.8.20", // Specify compiler version
+        settings: {
+            optimizer: {
+                enabled: true,
+                runs: 200, // Adjust optimization runs as needed
+            },
+        },
+    },
     networks: {
         ganache: {
             url: "http://127.0.0.1:7545",
@@ -11,10 +21,16 @@ const config = {
             timeout: 10000,
             chainId: 1337,
             accounts: [
-                // 0
-                // `0xd923a97d08ac110a423ec79bdbefb8f25c8b39f271ce4fb90145dbcfbd5aa337`,
-                // 7
-                `0x40ad2cb3ad99d83e1cc4a1d4c402023b0899d57716444c8c71002980d02952bc`,
+                process.env.ACCOUNT_0 || "",
+                process.env.ACCOUNT_1 || "",
+                process.env.ACCOUNT_2 || "",
+                process.env.ACCOUNT_3 || "",
+                process.env.ACCOUNT_4 || "",
+                process.env.ACCOUNT_5 || "",
+                process.env.ACCOUNT_6 || "",
+                process.env.ACCOUNT_7 || "",
+                process.env.ACCOUNT_8 || "",
+                process.env.ACCOUNT_9 || "",
             ],
         },
     },
