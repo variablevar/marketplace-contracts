@@ -2,10 +2,9 @@ import { ethers } from "hardhat";
 import { NFTFactory, NFTFactory__factory } from "../../typechain-types";
 import { FACTORY_ADDRESS } from "../constants/address";
 import NFTCollectionModel from "../models/nft-collection";
+import { provider } from "./provider";
 
-export async function listen() {
-  const provider = new ethers.JsonRpcProvider("http://192.168.29.142:7545");
-
+export function listenFactory() {
   const contract = new ethers.Contract(
     FACTORY_ADDRESS,
     NFTFactory__factory.abi,

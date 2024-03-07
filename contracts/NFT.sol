@@ -31,13 +31,22 @@ contract NFT is ERC721URIStorage, Ownable {
         transferOwnership(_owner);
     }
 
-    function safeMint(address to, string memory uri) public onlyOwner {
+    function safeMint(address to, string memory uri) public onlyOwner returns (uint256){
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
+        return tokenId;
     }
 
+    function mint(
+        address to,
+        uint256 tokenId,
+        string memory tokenURI
+    ) public {
+        _mint(to, tokenId);
+        _setTokenURI(tokenId, tokenURI);
+    }
 
     function tokenURI(uint256 tokenId)
         public

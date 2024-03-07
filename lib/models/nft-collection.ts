@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema } from "mongoose";
 
-// Define interface for the document
-interface INFTCollection extends Document {
+// Define export interface for the document
+export interface INFTCollection extends Document {
   creator: string;
   nft: string;
   name: string;
