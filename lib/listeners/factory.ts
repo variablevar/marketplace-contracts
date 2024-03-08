@@ -3,6 +3,7 @@ import { NFTFactory, NFTFactory__factory } from "../../typechain-types";
 import { FACTORY_ADDRESS } from "../constants/address";
 import NFTCollectionModel from "../models/nft-collection";
 import { provider } from "./provider";
+import { listenToken } from "./token";
 
 export function listenFactory() {
   const contract = new ethers.Contract(
@@ -33,7 +34,8 @@ export function listenFactory() {
         symbol,
       });
       await collection.save();
+      listenToken(nft);
     }
   );
-  console.log("LISTENING START");
+  console.log(`LISTENING START OF NFT FACTORY EVENTS AT ${FACTORY_ADDRESS}`);
 }

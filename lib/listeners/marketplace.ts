@@ -204,5 +204,7 @@ export function listenMarketplace() {
     }
   );
 
-  console.log("LISTENING START");
+  console.log(
+    `LISTENING START OF MARKETPLACE EVENTS AT ${MARKETPLACE_ADDRESS}`
+  );
 }

@@ -14,7 +14,7 @@ mongoose.connect(
 
 listen()
   .then(function () {
-    console.log("listening started on factory contract");
+    console.log("LISTEN STARTED");
   })
   .catch(function (err) {
     console.log(err);

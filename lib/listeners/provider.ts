@@ -1,5 +1,3 @@
 import { ethers } from "hardhat";
 
-export const provider = new ethers.JsonRpcProvider(
-  "http://192.168.29.142:7545"
-);
+export const provider = new ethers.JsonRpcProvider("http://0.0.0.0:7545");

@@ -99,7 +99,14 @@ describe("INTEGRATION", () => {
 
       factory.on(
         event,
-        async function (creatorAddress, nftAddress, name,imageURL, symbol, args) {
+        async function (
+          creatorAddress,
+          nftAddress,
+          name,
+          imageURL,
+          symbol,
+          args
+        ) {
           expect(creatorAddress).to.equal(await creator.getAddress());
           expect(name).to.equal(COLLECTION_NAME);
           expect(symbol).to.equal(COLLECTION_SYMBOL);
@@ -145,6 +152,17 @@ describe("INTEGRATION", () => {
   describe("NFT COLLECTION", () => {
     it("IT SHOULD MINT NFT", async () => {
       const CREATOR_ADDRESS = await creator.getAddress();
+
+      const EVENT_NAME = "Minted";
+      const event = nft.getEvent(EVENT_NAME);
+      nft.on(
+        event,
+        async function (creator: string, to: string, tokenId: bigint, args) {
+          expect(creator).to.equal(CREATOR_ADDRESS);
+          expect(to).to.equal(CREATOR_ADDRESS);
+          expect(NFT_TOKENS).to.include(tokenId);
+        }
+      );
       for (let index = 0; index < 10; index++) {
         const tx = await nft
           .connect(creator)

@@ -16,7 +16,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     ganache: {
-      url: "http://192.168.29.142:7545",
+      url: "http://0.0.0.0:7545",
       gas: "auto",
       gasPrice: "auto",
       timeout: 10000,
