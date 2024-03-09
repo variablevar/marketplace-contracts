@@ -74,12 +74,12 @@ describe("Marketplace", () => {
         event,
         async function (
           creator: string,
-          to: string,
+          tokenURI: string,
           tokenId: bigint,
           args
         ) {
           expect(creator).to.equal(CREATOR_ADDRESS);
-          expect(to).to.equal(CREATOR_ADDRESS);
+          expect(NFT_TOKENS_URI).to.include(tokenURI);
           expect(NFT_TOKENS).to.include(tokenId);
         }
       );    

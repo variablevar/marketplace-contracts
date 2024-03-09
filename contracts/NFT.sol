@@ -15,7 +15,11 @@ contract NFT is ERC721URIStorage, Ownable {
     string public imageURI;
     address private royaltyRecipient;
 
-    event Minted(address indexed operator, address indexed to, uint256 indexed tokenId);
+    event Minted(
+        address indexed operator,
+        string tokenURI,
+        uint256 indexed tokenId
+    );
 
     constructor(
         string memory _name,
@@ -37,16 +41,13 @@ contract NFT is ERC721URIStorage, Ownable {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
-        _setTokenURI(tokenId, uri);        
-        emit Minted(msg.sender, to, tokenId);
+        _setTokenURI(tokenId, uri);
+        emit Minted(msg.sender, uri, tokenId);
     }
 
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        override
-        returns (string memory)
-    {
+    function tokenURI(
+        uint256 tokenId
+    ) public view override returns (string memory) {
         return super.tokenURI(tokenId);
     }
 
@@ -54,7 +55,7 @@ contract NFT is ERC721URIStorage, Ownable {
         return royaltyFee;
     }
 
-    function getRoyaltyRecipient() external view returns(address) {
+    function getRoyaltyRecipient() external view returns (address) {
         return royaltyRecipient;
     }
 

@@ -21,10 +21,10 @@ export function listenToken(address: string) {
 
   token.on(
     event,
-    async function (creator: string, to: string, tokenId: bigint, args) {
+    async function (creator: string, tokenURI: string, tokenId: bigint, args) {
       const collection = new TokenModel({
         creator,
-        to,
+        tokenURI,
         tokenId,
       });
       await collection.save();

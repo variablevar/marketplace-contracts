@@ -157,12 +157,18 @@ describe("INTEGRATION", () => {
       const event = nft.getEvent(EVENT_NAME);
       nft.on(
         event,
-        async function (creator: string, to: string, tokenId: bigint, args) {
+        async function (
+          creator: string,
+          tokenURI: string,
+          tokenId: bigint,
+          args
+        ) {
           expect(creator).to.equal(CREATOR_ADDRESS);
-          expect(to).to.equal(CREATOR_ADDRESS);
+          expect(NFT_TOKENS_URI).to.include(tokenURI);
           expect(NFT_TOKENS).to.include(tokenId);
         }
-      );
+      );    
+
       for (let index = 0; index < 10; index++) {
         const tx = await nft
           .connect(creator)
