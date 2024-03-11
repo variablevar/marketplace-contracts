@@ -25,7 +25,7 @@ const AuthorRanksSchema: Schema<IAuthorRanks> = new Schema({
     wallet: { type: String, required: true },
     followers: { type: Number, required: true },
     bid: { type: Number, default: null },
-    author_sale: { type: AuthorSaleSchema, required: true },
+    author_sale: { type: Schema.Types.ObjectId,ref:'AuthorSale', },
     about: { type: String, required: true },
     published_at: { type: Date, required: true },
     created_at: { type: Date, required: true },

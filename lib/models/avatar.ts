@@ -25,9 +25,9 @@ export interface IAvatar extends Document {
     mime: MIME;
     size: number;
     url: string;
-    previewUrl: null;
+    previewUrl: string;
     provider: Provider;
-    provider_metadata: null;
+    provider_metadata: string;
     created_at: Date;
     updated_at: Date;
   }
@@ -44,7 +44,7 @@ export interface IAvatar extends Document {
     width: number;
     height: number;
     size: number;
-    path: null;
+    path: string;
     url: string;
   }
 
@@ -57,7 +57,7 @@ export const ThumbnailSchema: Schema<IThumbnail> = new Schema({
     width: { type: Number, required: true },
     height: { type: Number, required: true },
     size: { type: Number, required: true },
-    path: { type: null },
+    path: { type: String },
     url: { type: String, required: true },
   });
   
@@ -81,11 +81,17 @@ export const AvatarSchema: Schema<IAvatar> = new Schema({
     mime: { type: String, enum: Object.values(MIME), required: true },
     size: { type: Number, required: true },
     url: { type: String, required: true },
-    previewUrl: { type: null },
+    previewUrl: { type: String },
     provider: { type: String, enum: Object.values(Provider), required: true },
-    provider_metadata: { type: null },
-    created_at: { type: Date, required: true },
-    updated_at: { type: Date, required: true },
+    provider_metadata: { type: String },
+    created_at: {
+      type: Date,
+      default: Date.now // Set default value to current date and time
+    },
+    updated_at: {
+      type: Date,
+      default: Date.now // Set default value to current date and time
+    },
   });
 
   export const AvatarModel = mongoose.model<IAvatar>('Avatar', AvatarSchema);

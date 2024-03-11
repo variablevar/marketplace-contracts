@@ -11,7 +11,7 @@ export interface IUser extends Document {
   password:string;
   email: string;
   wallet: string;
-  followers?: number;
+  followers?: IUser[];
   bid?: IBid ;
   author_sale?: IAuthorSale;
   about?: string;
@@ -29,9 +29,9 @@ export interface IUser extends Document {
     password: { type: String, required: true },
     email: { type: String, required: true },
     wallet: { type: String, default : '' },
-    followers: { type: Number, default: 0 },
-    bid: { type: BidSchema },
-    author_sale: { type: AuthorSaleSchema },
+    followers: {type:[{ type: Schema.Types.ObjectId, ref: 'User' }],default:[]},
+    bid: { type: Schema.Types.ObjectId, ref: 'Bid' },
+    author_sale: { type: Schema.Types.ObjectId, ref: 'AuthorSale' } ,
     about: { type: String, default: ''},
     published_at: {
       type: Date,
@@ -45,10 +45,10 @@ export interface IUser extends Document {
       type: Date,
       default: Date.now // Set default value to current date and time
     },
-    avatar: { type: AvatarSchema, default: {}},
-    banner: { type: PreviewImageClassSchema, default: {} },
-    nfts: { type: [NftSchema], default: [] },
-    hot_collections: { type: [HotCollectionSchema], default: [] },
+    avatar:  { type: Schema.Types.ObjectId, ref: 'Avatar' },
+    banner:   { type: Schema.Types.ObjectId, ref: 'PreviewImageClass' } ,
+    nfts: {type:[{ type: Schema.Types.ObjectId, ref: 'Nft' }],default:[]},
+    hot_collections: {type:[{ type: Schema.Types.ObjectId, ref: 'HotCollection' }], default: []}
   });
 
 

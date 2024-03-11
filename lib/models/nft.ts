@@ -5,25 +5,25 @@ import { IUser, UserSchema } from "./user";
 
 export interface INft extends Document {
   id: number;
-  unique_id: null;
+  unique_id?: string;
   category: Category;
   status: Status;
   item_type: ItemType;
   collections: Collections;
-  deadline: Date | null;
+  deadline?: Date;
   author_link: AuthorLink;
   nft_link?: Link;
   bid_link: Link;
   title: string;
   price: number;
-  bid: number | null;
-  max_bid: number | null;
+  bid?: number;
+  max_bid?: number;
   likes: number;
   description: string;
   views: number;
-  priceover: number | null;
-  author: IUser;
-  showcase: boolean | null;
+  priceover?: number;
+  author?: IUser;
+  showcase?: boolean;
   published_at: Date;
   created_at: Date;
   updated_at: Date;
@@ -45,9 +45,9 @@ export interface IPreviewImageClass extends Document {
   mime: MIME;
   size: number;
   url: string;
-  previewUrl: null;
+  previewUrl: string;
   provider: Provider;
-  provider_metadata: null;
+  provider_metadata: string;
   created_at: Date;
   updated_at: Date;
 }
@@ -111,11 +111,17 @@ export const PreviewImageClassSchema: Schema<IPreviewImageClass> = new Schema({
   mime: { type: String, enum: Object.values(MIME), required: true },
   size: { type: Number, required: true },
   url: { type: String, required: true },
-  previewUrl: { type: null },
+  previewUrl: { type: String },
   provider: { type: String, enum: Object.values(Provider), required: true },
-  provider_metadata: { type: null },
-  created_at: { type: Date, required: true },
-  updated_at: { type: Date, required: true },
+  provider_metadata: { type: String },
+  created_at: {
+    type: Date,
+    default: Date.now // Set default value to current date and time
+  },
+  updated_at: {
+    type: Date,
+    default: Date.now // Set default value to current date and time
+  },
 });
 export const PreviewImageClassModel = mongoose.model<IPreviewImageClass>(
   "PreviewImageClass",
@@ -124,7 +130,7 @@ export const PreviewImageClassModel = mongoose.model<IPreviewImageClass>(
 
 export const NftSchema: Schema<INft> = new Schema({
   id: { type: Number, required: true },
-  unique_id: { type: null },
+  unique_id: { type: String },
   category: { type: String, enum: Object.values(Category), required: true },
   status: { type: String, enum: Object.values(Status), required: true },
   item_type: { type: String, enum: Object.values(ItemType), required: true },
@@ -139,8 +145,8 @@ export const NftSchema: Schema<INft> = new Schema({
     enum: Object.values(AuthorLink),
     required: true,
   },
-  nft_link: { type: Link },
-  bid_link: { type: String, enum: Object.values(Link), required: true },
+  nft_link: { type: String,  enum: Object.values(Link) },
+  bid_link: { type: String, enum: Object.values(Link) },
   title: { type: String, required: true },
   price: { type: Number, required: true },
   bid: { type: Number },
@@ -149,14 +155,20 @@ export const NftSchema: Schema<INft> = new Schema({
   description: { type: String, required: true },
   views: { type: Number, required: true },
   priceover: { type: Number },
-  author: { type: UserSchema, required: true },
+  author: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   showcase: { type: Boolean },
   published_at: { type: Date, required: true },
-  created_at: { type: Date, required: true },
-  updated_at: { type: Date, required: true },
-  preview_image: { type: PreviewImageClassSchema, required: true },
-  bids: { type: [BidSchema], default: [] },
-  history: { type: [BidSchema], default: [] },
+  created_at: {
+    type: Date,
+    default: Date.now // Set default value to current date and time
+  },
+  updated_at: {
+    type: Date,
+    default: Date.now // Set default value to current date and time
+  },
+  preview_image: { type: Schema.Types.ObjectId, ref: 'PreviewImageClass', required: true },
+  bids: {default:[],type:[{ type: Schema.Types.ObjectId, ref: 'Bid' }]},
+  history: {default:[],type:[{ type: Schema.Types.ObjectId, ref: 'Bid' }]},
 });
 
 export const NftModel = mongoose.model<INft>("Nft", NftSchema);
