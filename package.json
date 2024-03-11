@@ -2,7 +2,7 @@
   "name": "contracts",
   "version": "1.0.0",
   "description": "A smart contract module",
-  "main": "lib/index.ts",
+  "main": "build/lib/index.js",
   "directories": {
     "test": "test"
   },
