@@ -16,7 +16,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     ganache: {
-      url: "http://127.0.0.1:8545",
+      url: process.env.RPC_URL || "http://3.109.120.65:8545",
       gas: "auto",
       gasPrice: "auto",
       timeout: 10000,
