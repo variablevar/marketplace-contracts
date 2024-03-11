@@ -7,39 +7,48 @@ import { HotCollectionSchema, IHotCollection } from './hot-collection';
 
 
 export interface IUser extends Document {
-  id: number;
   username: string;
-  social: string;
+  password:string;
+  email: string;
   wallet: string;
-  followers: number;
+  followers?: number;
   bid?: IBid ;
-  author_sale: IAuthorSale;
-  about: string;
-  published_at: Date;
-  created_at: Date;
-  updated_at: Date;
-  avatar: IAvatar;
-  banner: IPreviewImageClass;
-  nfts: INft[];
-  hot_collections: IHotCollection[];
+  author_sale?: IAuthorSale;
+  about?: string;
+  published_at?: Date;
+  created_at?: Date;
+  updated_at?: Date;
+  avatar?: IAvatar;
+  banner?: IPreviewImageClass;
+  nfts?: INft[];
+  hot_collections?: IHotCollection[];
 }
 
   export const UserSchema: Schema<IUser> = new Schema({
-    id: { type: Number, required: true },
     username: { type: String, required: true },
-    social: { type: String, required: true },
-    wallet: { type: String, required: true },
-    followers: { type: Number, required: true },
+    password: { type: String, required: true },
+    email: { type: String, required: true },
+    wallet: { type: String, default : '' },
+    followers: { type: Number, default: 0 },
     bid: { type: BidSchema },
-    author_sale: { type: AuthorSaleSchema, required: true },
-    about: { type: String, required: true },
-    published_at: { type: Date, required: true },
-    created_at: { type: Date, required: true },
-    updated_at: { type: Date, required: true },
-    avatar: { type: AvatarSchema, required: true },
-    banner: { type: PreviewImageClassSchema, required: true },
-    nfts: { type: [NftSchema], required: true },
-    hot_collections: { type: [HotCollectionSchema], required: true },
+    author_sale: { type: AuthorSaleSchema },
+    about: { type: String, default: ''},
+    published_at: {
+      type: Date,
+      default: Date.now // Set default value to current date and time
+    },
+    created_at: {
+      type: Date,
+      default: Date.now // Set default value to current date and time
+    },
+    updated_at: {
+      type: Date,
+      default: Date.now // Set default value to current date and time
+    },
+    avatar: { type: AvatarSchema, default: {}},
+    banner: { type: PreviewImageClassSchema, default: {} },
+    nfts: { type: [NftSchema], default: [] },
+    hot_collections: { type: [HotCollectionSchema], default: [] },
   });
 
 
