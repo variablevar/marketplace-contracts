@@ -40,9 +40,9 @@ export function listenMarketplace() {
     ) {
       const listedNFT = new ListedNFTModel({
         nft,
-        tokenId,
-        price,
         seller,
+        price: Number(price),
+        tokenId: Number(tokenId),
       });
       await listedNFT.save();
     }
@@ -61,8 +61,8 @@ export function listenMarketplace() {
     ) {
       const boughtNFT = new BoughtNFTModel({
         nft,
-        tokenId,
-        price,
+        price: Number(price),
+        tokenId: Number(tokenId),
         seller,
         buyer,
       });
@@ -82,8 +82,8 @@ export function listenMarketplace() {
     ) {
       const offeredNFT = new OfferedNFTModel({
         nft,
-        tokenId,
-        offerPrice,
+        offerPrice: Number(offerPrice),
+        tokenId: Number(tokenId),
         offerer,
       });
       await offeredNFT.save();
@@ -104,8 +104,8 @@ export function listenMarketplace() {
     ) {
       const canceledOfferedNFT = new CanceledOfferedNFTModel({
         nft,
-        tokenId,
-        offerPrice,
+        offerPrice: Number(offerPrice),
+        tokenId: Number(tokenId),
         offerer,
       });
       await canceledOfferedNFT.save();
@@ -125,8 +125,8 @@ export function listenMarketplace() {
     ) {
       const acceptedNFT = new AcceptedNFTModel({
         nft,
-        tokenId,
-        offerPrice,
+        offerPrice: Number(offerPrice),
+        tokenId: Number(tokenId),
         offerer,
         nftOwner,
       });
@@ -149,11 +149,11 @@ export function listenMarketplace() {
     ) {
       const createdAuction = new CreatedAuctionModel({
         nft,
-        tokenId,
-        price,
-        minBid,
-        startTime,
-        endTime,
+        tokenId: Number(tokenId),
+        price: Number(price),
+        minBid: Number(minBid),
+        startTime: Number(startTime),
+        endTime: Number(endTime),
         creator,
       });
       await createdAuction.save();

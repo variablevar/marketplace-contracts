@@ -1,3 +1,4 @@
+import axios from "axios";
 import { ethers } from "hardhat";
 import { NFT, NFT__factory } from "../../typechain-types";
 import { MetadataModel, TokenModel } from "../models";
@@ -22,8 +23,8 @@ export function listenToken(address: string) {
   token.on(
     event,
     async function (creator: string, tokenURI: string, tokenId: bigint, args) {
-      const response = await fetch(tokenURI);
-      const metadataJSON = await response.json();
+      const response = await axios.get(tokenURI);
+      const metadataJSON = response.data;
 
       const metadata = await MetadataModel.create({
         ...metadataJSON,
@@ -32,6 +33,7 @@ export function listenToken(address: string) {
       const collection = await TokenModel.create({
         address,
         creator,
+        owner: creator,
         tokenURI,
         tokenId: parseInt(tokenId.toString()),
         metadata: metadata,
