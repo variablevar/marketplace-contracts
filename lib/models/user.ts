@@ -1,10 +1,9 @@
 import { compare, hash } from "bcrypt";
 import mongoose, { Document, Schema } from "mongoose";
 import { IAuthorSale } from "./author-sale";
-import { IAvatar } from "./avatar";
 import { IBid } from "./bid";
 import { IHotCollection } from "./hot-collection";
-import { INft, IPreviewImageClass } from "./nft";
+import { INft } from "./nft";
 
 export interface IUser extends Document {
   username: string;
@@ -18,8 +17,8 @@ export interface IUser extends Document {
   published_at?: Date;
   created_at?: Date;
   updated_at?: Date;
-  avatar?: IAvatar;
-  banner?: IPreviewImageClass;
+  avatar?: string;
+  banner?: string;
   nfts?: INft[];
   hot_collections?: IHotCollection[];
   comparePassword: (candidatePassword: string) => Promise<boolean>;
@@ -49,8 +48,8 @@ export const UserSchema: Schema<IUser> = new Schema({
     type: Date,
     default: Date.now, // Set default value to current date and time
   },
-  avatar: { type: Schema.Types.ObjectId, ref: "Avatar" },
-  banner: { type: Schema.Types.ObjectId, ref: "PreviewImageClass" },
+  avatar: { type: String, default: "" },
+  banner: { type: String, default: "" },
   nfts: { type: [{ type: Schema.Types.ObjectId, ref: "Nft" }], default: [] },
   hot_collections: {
     type: [{ type: Schema.Types.ObjectId, ref: "HotCollection" }],

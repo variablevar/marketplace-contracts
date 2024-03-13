@@ -49,11 +49,6 @@ describe("Marketplace", () => {
   ];
 
   before(async () => {
-    const signers = await ethers.getSigners();
-    for (let index = 0; index < signers.length; index++) {
-      const signer = signers[index];
-      console.log(signer.address);
-    }
     // CREATOR_ADDRESS = await creator.getAddress();
     // const NFT = new NFT__factory(creator);
     // nft = await NFT.deploy(
@@ -67,5 +62,8 @@ describe("Marketplace", () => {
     // await nft.waitForDeployment();
     // NFT_ADDRESS = nft.target;
     // expect(nft.target).not.eq(null, "Deploy NFT factory is failed.");
+  });
+  describe("", () => {
+    it("", () => {});
   });
 });
