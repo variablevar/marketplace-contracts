@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import { NFT, NFT__factory } from "../../typechain-types";
+import { MetadataModel, TokenModel } from "../models";
 import NFTCollectionModel from "../models/nft-collection";
-import TokenModel from "../models/token";
 import { provider } from "./provider";
 
 export async function listenEveryCollectionWhichIsCreated() {
@@ -22,12 +22,20 @@ export function listenToken(address: string) {
   token.on(
     event,
     async function (creator: string, tokenURI: string, tokenId: bigint, args) {
-      const collection = new TokenModel({
+      const response = await fetch(tokenURI);
+      const metadataJSON = await response.json();
+
+      const metadata = await MetadataModel.create({
+        ...metadataJSON,
+        tokenId: parseInt(tokenId.toString()),
+      });
+      const collection = await TokenModel.create({
+        address,
         creator,
         tokenURI,
-        tokenId,
+        tokenId: parseInt(tokenId.toString()),
+        metadata: metadata,
       });
-      await collection.save();
     }
   );
   console.log(`LISTENING START ON TOKEN AT ${address}`);

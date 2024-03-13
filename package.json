@@ -2,7 +2,7 @@
   "name": "contracts",
   "version": "1.0.0",
   "description": "A smart contract module",
-  "main": "build/lib/index.js",
+  "main": "lib/index.ts",
   "directories": {
     "test": "test"
   },
@@ -11,7 +11,7 @@
     "build": "tsc",
     "deploy": "npx hardhat run scripts/deploy.ts --network ganache",
     "build:typechain": "npx hardhat typechain",
-    "test": "nyc mocha -r ts-node/register test/marketplace/**.test.ts --timeout 600000 --exit"
+    "test": "nyc mocha -r ts-node/register test/live/collections.test.ts --timeout 600000 --exit"
   },
   "author": "variable",
   "license": "ISC",
