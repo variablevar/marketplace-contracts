@@ -47,10 +47,19 @@ export function listenMarketplace() {
         tokenId: Number(tokenId),
       });
       await listedNFT.save();
+      const author = await UserModel.findOne({ wallet: seller });
 
+      const tx = await BidModel.create({
+        value: Number(price),
+        author,
+        nft: `${nft}/${tokenId}`,
+      });
       await NftModel.findOneAndUpdate(
         { id: `${nft}/${tokenId}` },
-        { $set: { status: Status.BuyNow, price, showcase: true } }
+        {
+          $set: { status: Status.BuyNow, price: Number(price), showcase: true },
+          $push: { history: tx },
+        }
       );
     }
   );
@@ -77,7 +86,7 @@ export function listenMarketplace() {
 
       const author = await UserModel.findOne({ wallet: buyer });
       const tx = await BidModel.create({
-        value: price,
+        value: Number(price),
         author,
         nft: `${nft}/${tokenId}`,
       });
@@ -111,7 +120,7 @@ export function listenMarketplace() {
 
       const author = await UserModel.findOne({ wallet: offerer });
       const tx = await BidModel.create({
-        value: offerPrice,
+        value: Number(offerPrice),
         author,
         nft: `${nft}/${tokenId}`,
       });

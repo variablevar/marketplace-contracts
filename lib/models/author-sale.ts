@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
-
+import { IUser } from "./user";
 export interface IAuthorSale extends Document {
-  id: number;
+  address: string;
   sales: number;
   volume: number;
   daily_sales: number;
@@ -9,14 +9,14 @@ export interface IAuthorSale extends Document {
   floor_price: number;
   owners: number;
   assets: number;
-  author: number;
+  author: IUser;
   published_at: Date;
   created_at: Date;
   updated_at: Date;
 }
 
 export const AuthorSaleSchema: Schema<IAuthorSale> = new Schema({
-  id: { type: Number, required: true },
+  address: { type: String },
   sales: { type: Number, required: true },
   volume: { type: Number, required: true },
   daily_sales: { type: Number, required: true },
@@ -24,7 +24,7 @@ export const AuthorSaleSchema: Schema<IAuthorSale> = new Schema({
   floor_price: { type: Number, required: true },
   owners: { type: Number, required: true },
   assets: { type: Number, required: true },
-  author: { type: Number, required: true },
+  author: { type: Schema.Types.ObjectId,ref:"User", required: true },
   published_at: {
     type: Date,
     default: Date.now, // Set default value to current date and time

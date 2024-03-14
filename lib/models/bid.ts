@@ -14,9 +14,18 @@ export const BidSchema: Schema<IBid> = new Schema({
   value: { type: Number, required: true },
   nft: { type: String, required: true },
   author: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  published_at: { type: Date, required: true },
-  created_at: { type: Date, required: true },
-  updated_at: { type: Date, required: true },
+  published_at: {     
+    type: Date,
+    default: Date.now, // Set default value to current date and time
+  },
+  created_at: {
+    type: Date,
+    default: Date.now, // Set default value to current date and time
+  },
+  updated_at: {
+    type: Date,
+    default: Date.now, // Set default value to current date and time
+  },
 });
 
 export const BidModel = mongoose.model<IBid>("Bid", BidSchema);

@@ -60,7 +60,7 @@ export function listenToken(address: string) {
         description: metadata.description,
         views: 0,
         priceover: 0,
-        author: author,
+        author,
         showcase: false,
         preview_image: metadata.image,
       });

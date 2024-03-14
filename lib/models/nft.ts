@@ -72,17 +72,15 @@ export const NftSchema: Schema<INft> = new Schema({
   item_type: { type: String, enum: Object.values(ItemType), required: true },
   collections: {
     type: String,
-    enum: Object.values(Collections),
     required: true,
   },
   deadline: { type: Date },
   author_link: {
     type: String,
-    enum: Object.values(AuthorLink),
     required: true,
   },
-  nft_link: { type: String, enum: Object.values(Link) },
-  bid_link: { type: String, enum: Object.values(Link) },
+  nft_link: { type: String, required:true },
+  bid_link: { type: String, required:true },
   title: { type: String, required: true },
   price: { type: Number, required: true },
   bid: { type: Number },
@@ -93,7 +91,10 @@ export const NftSchema: Schema<INft> = new Schema({
   priceover: { type: Number },
   author: { type: Schema.Types.ObjectId, ref: "User", required: true },
   showcase: { type: Boolean },
-  published_at: { type: Date, required: true },
+  published_at: {     
+    type: Date,
+    default: Date.now, // Set default value to current date and time
+  },
   created_at: {
     type: Date,
     default: Date.now, // Set default value to current date and time

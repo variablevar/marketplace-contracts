@@ -30,7 +30,7 @@ export const UserSchema: Schema<IUser> = new Schema({
   password: { type: String, required: true },
   email: { type: String, required: true },
   wallet: { type: String, default: "" },
-  social: { type: String, required: true, default: "" },
+  social: { type: String, default: "" },
   followers: {
     type: [{ type: Schema.Types.ObjectId, ref: "User" }],
     default: [],
@@ -61,19 +61,6 @@ export const UserSchema: Schema<IUser> = new Schema({
 
 UserSchema.pre("save", async function (next) {
   const user = this;
-  if (user.isNew) {
-    user.author_sale = await AuthorSaleModel.create({
-      address: this.wallet,
-      sales: 0,
-      volume: 0,
-      daily_sales: 0,
-      weekly_sales: 0,
-      floor_price: 0,
-      owners: 0,
-      assets: 0,
-      author: this,
-    });
-  }
   if (!user.isModified("password")) return next();
 
   const hashed = await hash(user.password, 10);
