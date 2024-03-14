@@ -390,7 +390,7 @@ describe("INTEGRATION", () => {
 
         const tx = await marketplace
           .connect(offerer)
-          .offerNFT(NFT_ADDRESS, TOKEN_ID, { value: OFFER_PRICE });
+          .offerNFT(NFT_ADDRESS, TOKEN_ID,  OFFER_PRICE );
 
         await tx.wait();
       });
@@ -460,7 +460,7 @@ describe("INTEGRATION", () => {
 
         const tx = await marketplace
           .connect(offerer)
-          .offerNFT(NFT_ADDRESS, TOKEN_ID, { value: OFFER_PRICE });
+          .offerNFT(NFT_ADDRESS, TOKEN_ID,  OFFER_PRICE );
 
         await tx.wait();
       });

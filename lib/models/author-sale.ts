@@ -1,6 +1,5 @@
 import mongoose, { Schema } from "mongoose";
 
-
 export interface IAuthorSale extends Document {
   id: number;
   sales: number;
@@ -16,8 +15,6 @@ export interface IAuthorSale extends Document {
   updated_at: Date;
 }
 
-
-
 export const AuthorSaleSchema: Schema<IAuthorSale> = new Schema({
   id: { type: Number, required: true },
   sales: { type: Number, required: true },
@@ -28,9 +25,21 @@ export const AuthorSaleSchema: Schema<IAuthorSale> = new Schema({
   owners: { type: Number, required: true },
   assets: { type: Number, required: true },
   author: { type: Number, required: true },
-  published_at: { type: Date, required: true },
-  created_at: { type: Date, required: true },
-  updated_at: { type: Date, required: true },
+  published_at: {
+    type: Date,
+    default: Date.now, // Set default value to current date and time
+  },
+  created_at: {
+    type: Date,
+    default: Date.now, // Set default value to current date and time
+  },
+  updated_at: {
+    type: Date,
+    default: Date.now, // Set default value to current date and time
+  },
 });
 
-export const AuthorRanksModel = mongoose.model<IAuthorSale>('AuthorSale', AuthorSaleSchema);
+export const AuthorSaleModel = mongoose.model<IAuthorSale>(
+  "AuthorSale",
+  AuthorSaleSchema
+);

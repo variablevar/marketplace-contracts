@@ -7,14 +7,14 @@ import "./NFTFactory.sol";
 
 pragma experimental ABIEncoderV2;
 
-contract NFTMarketplace is NFTMarketplaceBlueprint , ReentrancyGuard{
+contract NFTMarketplace is NFTMarketplaceBlueprint, ReentrancyGuard {
     NFTFactory private immutable factory;
 
     constructor(
         uint256 _platformFee,
         address _feeRecipient,
         NFTFactory _factory
-    )  NFTMarketplaceBlueprint(_platformFee,_feeRecipient) {
+    ) NFTMarketplaceBlueprint(_platformFee, _feeRecipient) {
         factory = _factory;
     }
 
@@ -45,12 +45,12 @@ contract NFTMarketplace is NFTMarketplaceBlueprint , ReentrancyGuard{
     }
 
     // @notice Cancel listed NFT
-    function cancelListedNFT(address _nft, uint256 _tokenId)
-        external
-        isListedNFT(_nft, _tokenId)
-    {
+    function cancelListedNFT(
+        address _nft,
+        uint256 _tokenId
+    ) external isListedNFT(_nft, _tokenId) {
         ListNFT memory listedNFT = listNfts[_nft][_tokenId];
-        require(listedNFT.seller == msg.sender,NOT_LISTED_OWNER);
+        require(listedNFT.seller == msg.sender, NOT_LISTED_OWNER);
         IERC721(_nft).transferFrom(address(this), msg.sender, _tokenId);
         delete listNfts[_nft][_tokenId];
     }
@@ -59,7 +59,7 @@ contract NFTMarketplace is NFTMarketplaceBlueprint , ReentrancyGuard{
     function buyNFT(
         address _nft,
         uint256 _tokenId
-    ) external payable isListedNFT(_nft, _tokenId)  {
+    ) external payable isListedNFT(_nft, _tokenId) {
         ListNFT storage listedNft = listNfts[_nft][_tokenId];
 
         require(!listedNft.sold, NFT_ALREADY_SOLD);
@@ -107,10 +107,10 @@ contract NFTMarketplace is NFTMarketplaceBlueprint , ReentrancyGuard{
     // @notice Offer listed NFT
     function offerNFT(
         address _nft,
-        uint256 _tokenId
-    ) external payable  isListedNFT(_nft, _tokenId) {
-        require(msg.value > 0, NOT_ZERO_PRICE);
-        uint256 _offerPrice = msg.value;
+        uint256 _tokenId,
+        uint256 _offerPrice
+    ) external isListedNFT(_nft, _tokenId) {
+        require(_offerPrice > 0, NOT_ZERO_PRICE);
 
         ListNFT memory nft = listNfts[_nft][_tokenId];
 
@@ -122,24 +122,20 @@ contract NFTMarketplace is NFTMarketplaceBlueprint , ReentrancyGuard{
             accepted: false
         });
 
-        emit OfferredNFT(
-            nft.nft,
-            nft.tokenId,
-            _offerPrice,
-            msg.sender
-        );
+        emit OfferredNFT(nft.nft, nft.tokenId, _offerPrice, msg.sender);
     }
 
     // @notice Offerer cancel offerring
-    function cancelOfferNFT(address _nft, uint256 _tokenId,address _offerer)
-        external
-        isOfferredNFT(_nft, _tokenId, _offerer)
-    {
+    function cancelOfferNFT(
+        address _nft,
+        uint256 _tokenId,
+        address _offerer
+    ) external isOfferredNFT(_nft, _tokenId, _offerer) {
         OfferNFT memory offer = offerNfts[_nft][_tokenId][_offerer];
         require(offer.offerer == _offerer, NOT_OFFERER);
         require(!offer.accepted, OFFER_ALREADY_ACCEPTED);
         delete offerNfts[_nft][_tokenId][_offerer];
-        payable(offer.offerer).transfer(offer.offerPrice);
+
         emit CanceledOfferredNFT(
             offer.nft,
             offer.tokenId,
@@ -164,7 +160,7 @@ contract NFTMarketplace is NFTMarketplaceBlueprint , ReentrancyGuard{
         );
         OfferNFT storage offer = offerNfts[_nft][_tokenId][_offerer];
         ListNFT storage list = listNfts[offer.nft][offer.tokenId];
-        require(!list.sold,NFT_ALREADY_SOLD );
+        require(!list.sold, NFT_ALREADY_SOLD);
         require(!offer.accepted, OFFER_ALREADY_ACCEPTED);
 
         list.sold = true;
@@ -250,10 +246,10 @@ contract NFTMarketplace is NFTMarketplaceBlueprint , ReentrancyGuard{
     }
 
     // @notice Cancel auction
-    function cancelAuction(address _nft, uint256 _tokenId)
-        external
-        isAuction(_nft, _tokenId)
-    {
+    function cancelAuction(
+        address _nft,
+        uint256 _tokenId
+    ) external isAuction(_nft, _tokenId) {
         AuctionNFT memory auction = auctionNfts[_nft][_tokenId];
         require(auction.creator == msg.sender, NOT_AUCTION_CREATOR);
         require(block.timestamp < auction.startTime, AUCTION_ALREADY_STARTED);
@@ -287,26 +283,26 @@ contract NFTMarketplace is NFTMarketplaceBlueprint , ReentrancyGuard{
         uint256 _bidPrice = msg.value;
 
         AuctionNFT storage auction = auctionNfts[_nft][_tokenId];
-       
+
         if (auction.lastBidder != address(0)) {
             address lastBidder = auction.lastBidder;
             uint256 lastBidPrice = auction.heighestBid;
 
             // Transfer back to last bidder
-            payable (lastBidder).transfer(lastBidPrice);
+            payable(lastBidder).transfer(lastBidPrice);
         }
 
         // Set new heighest bid price
         auction.lastBidder = msg.sender;
         auction.heighestBid = _bidPrice;
-        bidPrices[_nft][_tokenId][msg.sender]= _bidPrice;
+        bidPrices[_nft][_tokenId][msg.sender] = _bidPrice;
 
         emit PlacedBid(_nft, _tokenId, _bidPrice, msg.sender);
     }
 
     // @notice Result auction, can call by auction creator, heighest bidder, or marketplace owner only!
     function resultAuction(address _nft, uint256 _tokenId) external {
-        require(!auctionNfts[_nft][_tokenId].success,AUCTION_ENDED);
+        require(!auctionNfts[_nft][_tokenId].success, AUCTION_ENDED);
         require(
             msg.sender == owner() ||
                 msg.sender == auctionNfts[_nft][_tokenId].creator ||
@@ -336,7 +332,7 @@ contract NFTMarketplace is NFTMarketplaceBlueprint , ReentrancyGuard{
             uint256 royaltyTotal = calculateRoyalty(royaltyFee, heighestBid);
 
             // Transfer royalty fee to collection owner
-            payable (royaltyRecipient).transfer(royaltyTotal);
+            payable(royaltyRecipient).transfer(royaltyTotal);
             totalPrice -= royaltyTotal;
         }
 
@@ -344,7 +340,7 @@ contract NFTMarketplace is NFTMarketplaceBlueprint , ReentrancyGuard{
         uint256 platformFeeTotal = calculatePlatformFee(heighestBid);
         payable(feeRecipient).transfer(platformFeeTotal);
         totalPrice -= platformFeeTotal;
-        
+
         // Transfer to auction creator
         payable(auction.creator).transfer(totalPrice);
 
@@ -361,27 +357,23 @@ contract NFTMarketplace is NFTMarketplaceBlueprint , ReentrancyGuard{
         );
     }
 
-    function calculatePlatformFee(uint256 _price)
-        public
-        view
-        returns (uint256)
-    {
+    function calculatePlatformFee(
+        uint256 _price
+    ) public view returns (uint256) {
         return (_price * platformFee) / 10000;
     }
 
-    function calculateRoyalty(uint256 _royalty, uint256 _price)
-        public
-        pure
-        returns (uint256)
-    {
+    function calculateRoyalty(
+        uint256 _royalty,
+        uint256 _price
+    ) public pure returns (uint256) {
         return (_price * _royalty) / 10000;
     }
 
-    function getListedNFT(address _nft, uint256 _tokenId)
-        public
-        view
-        returns (ListNFT memory)
-    {
+    function getListedNFT(
+        address _nft,
+        uint256 _tokenId
+    ) public view returns (ListNFT memory) {
         return listNfts[_nft][_tokenId];
     }
 

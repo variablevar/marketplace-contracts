@@ -3,16 +3,17 @@ import { IBid } from "./bid";
 import { IUser } from "./user";
 
 export interface INft extends Document {
-  id: number;
+  id: string;
   tokenId?: string;
   category: Category;
   status: Status;
   item_type: ItemType;
-  collections: Collections;
+  collections: string;
+  start?: Date;
   deadline?: Date;
-  author_link: AuthorLink;
-  nft_link?: Link;
-  bid_link: Link;
+  author_link: string;
+  nft_link?: string;
+  bid_link: string;
   title: string;
   price: number;
   bid?: number;
@@ -57,13 +58,14 @@ export enum ItemType {
 }
 
 export enum Status {
+  None = "none",
   BuyNow = "buy_now",
   HasOffers = "has_offers",
   OnAuction = "on_auction",
 }
 
 export const NftSchema: Schema<INft> = new Schema({
-  id: { type: Number, required: true },
+  id: { type: String, required: true, unique: true },
   tokenId: { type: String, required: true },
   category: { type: String, enum: Object.values(Category), required: true },
   status: { type: String, enum: Object.values(Status), required: true },

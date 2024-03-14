@@ -11,11 +11,13 @@ import {
   PLACED_BID_EVENT,
   RESULTED_AUCTION_EVENT,
 } from "../constants/events";
+import { BidModel, NftModel, UserModel } from "../models";
 import AcceptedNFTModel from "../models/accepted-nft";
 import BoughtNFTModel from "../models/bought-nft";
 import CanceledOfferedNFTModel from "../models/canceled-offered-nft";
 import CreatedAuctionModel from "../models/created-auction";
 import ListedNFTModel from "../models/listed-nft";
+import { Status } from "../models/nft";
 import OfferedNFTModel from "../models/offered-nft";
 import PlacedBidModel from "../models/placed-bid";
 import ResultedAuctionModel from "../models/resulted-auction";
@@ -45,6 +47,11 @@ export function listenMarketplace() {
         tokenId: Number(tokenId),
       });
       await listedNFT.save();
+
+      await NftModel.findOneAndUpdate(
+        { id: `${nft}/${tokenId}` },
+        { $set: { status: Status.BuyNow, price, showcase: true } }
+      );
     }
   );
 
@@ -67,6 +74,20 @@ export function listenMarketplace() {
         buyer,
       });
       await boughtNFT.save();
+
+      const author = await UserModel.findOne({ wallet: buyer });
+      const tx = await BidModel.create({
+        value: price,
+        author,
+        nft: `${nft}/${tokenId}`,
+      });
+      await NftModel.findOneAndUpdate(
+        { id: `${nft}/${tokenId}` },
+        {
+          $set: { status: Status.None, author, priceover: Number(price) },
+          $push: { history: tx },
+        }
+      );
     }
   );
 
@@ -87,6 +108,20 @@ export function listenMarketplace() {
         offerer,
       });
       await offeredNFT.save();
+
+      const author = await UserModel.findOne({ wallet: offerer });
+      const tx = await BidModel.create({
+        value: offerPrice,
+        author,
+        nft: `${nft}/${tokenId}`,
+      });
+      await NftModel.findOneAndUpdate(
+        { id: `${nft}/${tokenId}` },
+        {
+          $set: { status: Status.HasOffers, priceover: Number(offerPrice) },
+          $push: { history: tx },
+        }
+      );
     }
   );
 

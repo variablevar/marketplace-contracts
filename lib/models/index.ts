@@ -1,5 +1,4 @@
 import AcceptedNFTModel from "./accepted-nft";
-import { AuthorRanksModel } from "./author-sale";
 import { BidModel } from "./bid";
 import BoughtNFTModel from "./bought-nft";
 import CanceledOfferedNFTModel from "./canceled-offered-nft";
@@ -16,7 +15,6 @@ import TokenModel from "./token";
 import { UserModel } from "./user";
 export {
   AcceptedNFTModel,
-  AuthorRanksModel,
   BidModel,
   BoughtNFTModel,
   CanceledOfferedNFTModel,
