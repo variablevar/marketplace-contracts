@@ -11,6 +11,7 @@
     "build": "tsc",
     "deploy": "npx hardhat run scripts/deploy.ts --network ganache",
     "build:typechain": "npx hardhat typechain",
+    "build:interface": "npx hardhat run scripts/interface.ts --network ganache",
     "test": "nyc mocha -r ts-node/register test/marketplace/**.test.ts --timeout 600000 --exit"
   },
   "author": "variable",
@@ -19,6 +20,7 @@
     "@types/mongoose": "^5.11.97",
     "axios": "^1.6.7",
     "bcrypt": "^5.1.1",
+    "buffer": "^6.0.3",
     "dotenv": "^16.4.5",
     "mongoose": "^8.2.1",
     "ts-node": "^10.9.2",

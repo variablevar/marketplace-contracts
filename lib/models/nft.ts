@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { IBid } from "./bid";
-import { IUser } from "./user";
 import { IMetadata } from "./metadata";
+import { IUser } from "./user";
 
 export interface INft extends Document {
   id: string;
@@ -29,7 +29,7 @@ export interface INft extends Document {
   created_at: Date;
   updated_at: Date;
   preview_image: string;
-  metadata:IMetadata;
+  metadata: IMetadata;
   bids: IBid[];
   history: IBid[];
 }
@@ -43,16 +43,15 @@ export enum Link {
 }
 
 export enum Category {
-  ART = 'art',
-  MUSIC = 'music',
-  DOMAIN_NAMES = 'domain_names',
-  VIRTUAL_WORLD = 'virtual_world',
-  TRADING_CARDS = 'trading_cards',
-  COLLECTIBLES = 'collectibles',
-  SPORTS = 'sports',
-  UTILITY = 'utility'
+  ART = "art",
+  MUSIC = "music",
+  DOMAIN_NAMES = "domain_names",
+  VIRTUAL_WORLD = "virtual_world",
+  TRADING_CARDS = "trading_cards",
+  COLLECTIBLES = "collectibles",
+  SPORTS = "sports",
+  UTILITY = "utility",
 }
-
 export enum Collections {
   Abstraction = "abstraction",
   Cartoonism = "cartoonism",
@@ -85,8 +84,8 @@ export const NftSchema: Schema<INft> = new Schema({
     type: String,
     required: true,
   },
-  nft_link: { type: String, required:true },
-  bid_link: { type: String, required:true },
+  nft_link: { type: String, required: true },
+  bid_link: { type: String, required: true },
   title: { type: String, required: true },
   price: { type: Number, required: true },
   bid: { type: Number },
@@ -95,10 +94,10 @@ export const NftSchema: Schema<INft> = new Schema({
   description: { type: String, required: true },
   views: { type: Number, required: true },
   priceover: { type: Number },
-  metadata:{ type: Schema.Types.ObjectId, ref: "Metadata", required: true },
+  metadata: { type: Schema.Types.ObjectId, ref: "Metadata", required: true },
   author: { type: Schema.Types.ObjectId, ref: "User", required: true },
   showcase: { type: Boolean },
-  published_at: {     
+  published_at: {
     type: Date,
     default: Date.now, // Set default value to current date and time
   },
