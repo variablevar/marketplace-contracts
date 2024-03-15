@@ -21,6 +21,8 @@ export const pinJSONToIPFS = async (JSONBody: IMetadata) => {
     .catch(function (error: any) {
       return {
         success: false,
+        pinataUrl: null,
+
         message: error.message,
       };
     });
@@ -44,6 +46,7 @@ export const pinFileToIPFS = async (formdata: FormData) => {
     .catch(function (error: any) {
       return {
         success: false,
+        pinataUrl: null,
         message: error.message,
       };
     });
