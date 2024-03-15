@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { IBid } from "./bid";
 import { IUser } from "./user";
+import { IMetadata } from "./metadata";
 
 export interface INft extends Document {
   id: string;
@@ -28,6 +29,7 @@ export interface INft extends Document {
   created_at: Date;
   updated_at: Date;
   preview_image: string;
+  metadata:IMetadata;
   bids: IBid[];
   history: IBid[];
 }
@@ -41,10 +43,14 @@ export enum Link {
 }
 
 export enum Category {
-  Art = "art",
-  Collectibles = "collectibles",
-  Music = "music",
-  VirtualWorld = "virtual_world",
+  ART = 'art',
+  MUSIC = 'music',
+  DOMAIN_NAMES = 'domain_names',
+  VIRTUAL_WORLD = 'virtual_world',
+  TRADING_CARDS = 'trading_cards',
+  COLLECTIBLES = 'collectibles',
+  SPORTS = 'sports',
+  UTILITY = 'utility'
 }
 
 export enum Collections {
@@ -89,6 +95,7 @@ export const NftSchema: Schema<INft> = new Schema({
   description: { type: String, required: true },
   views: { type: Number, required: true },
   priceover: { type: Number },
+  metadata:{ type: Schema.Types.ObjectId, ref: "Metadata", required: true },
   author: { type: Schema.Types.ObjectId, ref: "User", required: true },
   showcase: { type: Boolean },
   published_at: {     

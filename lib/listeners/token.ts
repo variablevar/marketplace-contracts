@@ -43,7 +43,7 @@ export function listenToken(address: string) {
       await NftModel.create({
         id: `${address}/${tokenId}`,
         tokenId: metadata.tokenId,
-        category: Category.Art,
+        category: metadata.category,
         status: Status.None,
         item_type: ItemType.SingleItems,
         collections: metadata.collection_name,
@@ -53,6 +53,7 @@ export function listenToken(address: string) {
         nft_link: `/item-detail/${address}/${tokenId}`,
         bid_link: `/item-detail/${address}/${tokenId}`,
         title: metadata.name,
+        metadata:metadata,
         price: 0,
         bid: 0,
         max_bid: 0,
