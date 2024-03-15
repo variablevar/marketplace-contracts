@@ -11,8 +11,9 @@ import {
   PLACED_BID_EVENT,
   RESULTED_AUCTION_EVENT,
 } from "../constants/events";
-import { BidModel, NftModel, UserModel } from "../models";
+import { BidModel, NftModel, TokenModel, UserModel } from "../models";
 import AcceptedNFTModel from "../models/accepted-nft";
+import { TransactionType } from "../models/bid";
 import BoughtNFTModel from "../models/bought-nft";
 import CanceledOfferedNFTModel from "../models/canceled-offered-nft";
 import CreatedAuctionModel from "../models/created-auction";
@@ -50,10 +51,12 @@ export function listenMarketplace() {
       const author = await UserModel.findOne({ wallet: seller });
 
       const tx = await BidModel.create({
+        type: TransactionType.List,
         value: Number(price),
         author,
         nft: `${nft}/${tokenId}`,
       });
+
       await NftModel.findOneAndUpdate(
         { id: `${nft}/${tokenId}` },
         {
@@ -85,10 +88,17 @@ export function listenMarketplace() {
       await boughtNFT.save();
 
       const author = await UserModel.findOne({ wallet: buyer });
+      await TokenModel.findOneAndUpdate(
+        { address: nft, tokenId: Number(tokenId) },
+        {
+          $set: { owner: buyer },
+        }
+      );
       const tx = await BidModel.create({
         value: Number(price),
         author,
         nft: `${nft}/${tokenId}`,
+        type: TransactionType.Buy,
       });
       await NftModel.findOneAndUpdate(
         { id: `${nft}/${tokenId}` },
@@ -122,6 +132,7 @@ export function listenMarketplace() {
       const tx = await BidModel.create({
         value: Number(offerPrice),
         author,
+        type: TransactionType.Offer,
         nft: `${nft}/${tokenId}`,
       });
       await NftModel.findOneAndUpdate(
@@ -153,6 +164,20 @@ export function listenMarketplace() {
         offerer,
       });
       await canceledOfferedNFT.save();
+      const author = await UserModel.findOne({ wallet: offerer });
+      const tx = await BidModel.create({
+        value: Number(offerPrice),
+        author,
+        type: TransactionType.CancelOffer,
+        nft: `${nft}/${tokenId}`,
+      });
+      await NftModel.findOneAndUpdate(
+        { id: `${nft}/${tokenId}` },
+        {
+          $set: { status: Status.BuyNow, priceover: Number(offerPrice) },
+          $push: { history: tx },
+        }
+      );
     }
   );
 
@@ -175,6 +200,27 @@ export function listenMarketplace() {
         nftOwner,
       });
       await acceptedNFT.save();
+      await TokenModel.findOneAndUpdate(
+        { address: nft, tokenId: Number(tokenId) },
+        {
+          $set: { owner: offerer },
+        }
+      );
+
+      const author = await UserModel.findOne({ wallet: offerer });
+      const tx = await BidModel.create({
+        value: Number(offerPrice),
+        author,
+        type: TransactionType.AcceptOffer,
+        nft: `${nft}/${tokenId}`,
+      });
+      await NftModel.findOneAndUpdate(
+        { id: `${nft}/${tokenId}` },
+        {
+          $set: { status: Status.None, priceover: Number(offerPrice), author },
+          $push: { history: tx },
+        }
+      );
     }
   );
 
@@ -201,6 +247,26 @@ export function listenMarketplace() {
         creator,
       });
       await createdAuction.save();
+      const author = await UserModel.findOne({ wallet: creator });
+      const tx = await BidModel.create({
+        value: Number(price),
+        author,
+        type: TransactionType.Bid,
+        nft: `${nft}/${tokenId}`,
+      });
+      await NftModel.findOneAndUpdate(
+        { id: `${nft}/${tokenId}` },
+        {
+          $set: {
+            status: Status.OnAuction,
+            priceover: Number(price),
+            price: Number(price),
+            start: Number(startTime),
+            deadline: Number(endTime),
+          },
+          $push: { history: tx },
+        }
+      );
     }
   );
 
@@ -221,6 +287,26 @@ export function listenMarketplace() {
         bidder,
       });
       await placedBid.save();
+
+      const author = await UserModel.findOne({ wallet: bidder });
+      const tx = await BidModel.create({
+        value: Number(bidPrice),
+        author,
+        type: TransactionType.Bid,
+        nft: `${nft}/${tokenId}`,
+      });
+      await NftModel.findOneAndUpdate(
+        { id: `${nft}/${tokenId}` },
+        {
+          $set: {
+            status: Status.OnAuction,
+            priceover: Number(bidPrice),
+            price: Number(bidPrice),
+          },
+          $push: { history: tx },
+          $inc: { bid: 1, max_bid: 1 },
+        }
+      );
     }
   );
 
@@ -245,6 +331,32 @@ export function listenMarketplace() {
         caller,
       });
       await resultedAuction.save();
+      await TokenModel.findOneAndUpdate(
+        { address: nft, tokenId: Number(tokenId) },
+        {
+          $set: { owner: winner },
+        }
+      );
+      const author = await UserModel.findOne({ wallet: winner });
+      const tx = await BidModel.create({
+        value: Number(price),
+        author,
+        type: TransactionType.Bid,
+        nft: `${nft}/${tokenId}`,
+      });
+      await NftModel.findOneAndUpdate(
+        { id: `${nft}/${tokenId}` },
+        {
+          $set: {
+            status: Status.OnAuction,
+            priceover: Number(price),
+            price: Number(price),
+            author,
+          },
+          $push: { history: tx },
+          $inc: { bid: 1, max_bid: 1 },
+        }
+      );
     }
   );
 
