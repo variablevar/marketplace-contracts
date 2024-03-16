@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import { IUser } from "./user";
 
 export interface IHotCollection extends Document {
-  id: number;
+  id: string;
   unique_id: string;
   author: IUser;
   name: string;
@@ -13,13 +13,21 @@ export interface IHotCollection extends Document {
 }
 
 export const HotCollectionSchema: Schema = new Schema({
-  id: { type: Number, required: true },
-  unique_id: { type: String, required: true },
+  id: { type: String, required: true },
   author: { type: Schema.Types.ObjectId, ref: "User", required: true },
   name: { type: String, required: true },
-  published_at: { type: Date, required: true },
-  created_at: { type: Date, required: true },
-  updated_at: { type: Date, required: true },
+  published_at: {
+    type: Date,
+    default: Date.now, // Set default value to current date and time
+  },
+  created_at: {
+    type: Date,
+    default: Date.now, // Set default value to current date and time
+  },
+  updated_at: {
+    type: Date,
+    default: Date.now, // Set default value to current date and time
+  },
   banner: { type: String, required: true, default: "" },
 });
 

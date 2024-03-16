@@ -2,7 +2,7 @@ import axios from "axios";
 import { ethers } from "hardhat";
 import { NFT, NFT__factory } from "../../typechain-types";
 import { MetadataModel, NftModel, TokenModel, UserModel } from "../models";
-import { Category, ItemType, Status } from "../models/nft";
+import { ItemType, Status } from "../models/nft";
 import NFTCollectionModel from "../models/nft-collection";
 import { provider } from "./provider";
 
@@ -40,7 +40,7 @@ export function listenToken(address: string) {
         tokenId: parseInt(tokenId.toString()),
         metadata: metadata,
       });
-      await NftModel.create({
+      const nft = await NftModel.create({
         id: `${address}/${tokenId}`,
         tokenId: metadata.tokenId,
         category: metadata.category,
@@ -53,7 +53,7 @@ export function listenToken(address: string) {
         nft_link: `/item-detail/${address}/${tokenId}`,
         bid_link: `/item-detail/${address}/${tokenId}`,
         title: metadata.name,
-        metadata:metadata,
+        metadata: metadata,
         price: 0,
         bid: 0,
         max_bid: 0,
@@ -65,6 +65,7 @@ export function listenToken(address: string) {
         showcase: false,
         preview_image: metadata.image,
       });
+      author?.nfts.push(nft);
     }
   );
   console.log(`LISTENING START ON TOKEN AT ${address}`);

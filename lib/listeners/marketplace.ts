@@ -87,7 +87,8 @@ export function listenMarketplace() {
       });
       await boughtNFT.save();
 
-      const author = await UserModel.findOne({ wallet: buyer });
+      const authorUser = await UserModel.findOne({ wallet: buyer });
+      const sellerUser = await UserModel.findOne({ wallet: seller });
       await TokenModel.findOneAndUpdate(
         { address: nft, tokenId: Number(tokenId) },
         {
@@ -96,17 +97,28 @@ export function listenMarketplace() {
       );
       const tx = await BidModel.create({
         value: Number(price),
-        author,
+        author: authorUser,
         nft: `${nft}/${tokenId}`,
         type: TransactionType.Buy,
       });
       await NftModel.findOneAndUpdate(
         { id: `${nft}/${tokenId}` },
         {
-          $set: { status: Status.None, author, priceover: Number(price) },
+          $set: {
+            status: Status.None,
+            author: authorUser,
+            priceover: Number(price),
+          },
           $push: { history: tx },
         }
       );
+      const updatedNFT = await NftModel.findOne({ id: `${nft}/${tokenId}` });
+      if (authorUser && sellerUser && updatedNFT) {
+        sellerUser.nfts.filter((nft) => nft.id === `${nft}/${tokenId}`);
+        await sellerUser.save();
+        authorUser.nfts.push(updatedNFT);
+        await authorUser.save();
+      }
     }
   );
 
@@ -207,20 +219,33 @@ export function listenMarketplace() {
         }
       );
 
-      const author = await UserModel.findOne({ wallet: offerer });
+      const authorUser = await UserModel.findOne({ wallet: offerer });
+      const sellerUser = await UserModel.findOne({ wallet: nftOwner });
+
       const tx = await BidModel.create({
         value: Number(offerPrice),
-        author,
+        author: authorUser,
         type: TransactionType.AcceptOffer,
         nft: `${nft}/${tokenId}`,
       });
       await NftModel.findOneAndUpdate(
         { id: `${nft}/${tokenId}` },
         {
-          $set: { status: Status.None, priceover: Number(offerPrice), author },
+          $set: {
+            status: Status.None,
+            priceover: Number(offerPrice),
+            author: authorUser,
+          },
           $push: { history: tx },
         }
       );
+      const updatedNFT = await NftModel.findOne({ id: `${nft}/${tokenId}` });
+      if (authorUser && sellerUser && updatedNFT) {
+        sellerUser.nfts.filter((nft) => nft.id === `${nft}/${tokenId}`);
+        await sellerUser.save();
+        authorUser.nfts.push(updatedNFT);
+        await authorUser.save();
+      }
     }
   );
 
@@ -295,6 +320,7 @@ export function listenMarketplace() {
         type: TransactionType.Bid,
         nft: `${nft}/${tokenId}`,
       });
+      author?.bids.push(tx);
       await NftModel.findOneAndUpdate(
         { id: `${nft}/${tokenId}` },
         {
@@ -307,6 +333,7 @@ export function listenMarketplace() {
           $inc: { bid: 1, max_bid: 1 },
         }
       );
+      author?.save();
     }
   );
 
@@ -337,10 +364,12 @@ export function listenMarketplace() {
           $set: { owner: winner },
         }
       );
-      const author = await UserModel.findOne({ wallet: winner });
+      const authorUser = await UserModel.findOne({ wallet: winner });
+      const sellerUser = await UserModel.findOne({ wallet: creator });
+
       const tx = await BidModel.create({
         value: Number(price),
-        author,
+        author: authorUser,
         type: TransactionType.Bid,
         nft: `${nft}/${tokenId}`,
       });
@@ -351,12 +380,19 @@ export function listenMarketplace() {
             status: Status.OnAuction,
             priceover: Number(price),
             price: Number(price),
-            author,
+            author: authorUser,
           },
           $push: { history: tx },
           $inc: { bid: 1, max_bid: 1 },
         }
       );
+      const updatedNFT = await NftModel.findOne({ id: `${nft}/${tokenId}` });
+      if (authorUser && sellerUser && updatedNFT) {
+        sellerUser.nfts.filter((nft) => nft.id === `${nft}/${tokenId}`);
+        await sellerUser.save();
+        authorUser.nfts.push(updatedNFT);
+        await authorUser.save();
+      }
     }
   );
 

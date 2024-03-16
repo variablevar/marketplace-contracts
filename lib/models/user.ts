@@ -1,6 +1,6 @@
 import { compare, hash } from "bcrypt";
 import mongoose, { Document, Schema } from "mongoose";
-import { AuthorSaleModel, IAuthorSale } from "./author-sale";
+import { IAuthorSale } from "./author-sale";
 import { IBid } from "./bid";
 import { IHotCollection } from "./hot-collection";
 import { INft } from "./nft";
@@ -11,17 +11,17 @@ export interface IUser extends Document {
   email: string;
   wallet: string;
   social: string;
-  followers?: IUser[];
-  bid?: IBid;
-  author_sale?: IAuthorSale;
+  followers: IUser[];
+  bids: IBid[];
+  author_sale: IAuthorSale;
   about?: string;
   published_at?: Date;
   created_at?: Date;
   updated_at?: Date;
   avatar?: string;
   banner?: string;
-  nfts?: INft[];
-  hot_collections?: IHotCollection[];
+  nfts: INft[];
+  hot_collections: IHotCollection[];
   comparePassword: (candidatePassword: string) => Promise<boolean>;
 }
 
@@ -35,7 +35,10 @@ export const UserSchema: Schema<IUser> = new Schema({
     type: [{ type: Schema.Types.ObjectId, ref: "User" }],
     default: [],
   },
-  bid: { type: Schema.Types.ObjectId, ref: "Bid" },
+  bids: {
+    type: [{ type: Schema.Types.ObjectId, ref: "Bid" }],
+    default: [],
+  },
   author_sale: { type: Schema.Types.ObjectId, ref: "AuthorSale" },
   about: { type: String, default: "" },
   published_at: {

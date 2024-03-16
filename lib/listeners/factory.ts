@@ -1,6 +1,7 @@
 import { ethers } from "hardhat";
 import { NFTFactory, NFTFactory__factory } from "../../typechain-types";
 import { FACTORY_ADDRESS } from "../constants/address";
+import { HotCollectionModel, UserModel } from "../models";
 import NFTCollectionModel from "../models/nft-collection";
 import { provider } from "./provider";
 import { listenToken } from "./token";
@@ -33,7 +34,17 @@ export function listenFactory() {
         image,
         symbol,
       });
+      const author = await UserModel.findOne({ wallet: creator });
+      const hotCollection = new HotCollectionModel({
+        id: nft,
+        author,
+        name: name,
+        banner: image,
+      });
       await collection.save();
+      await hotCollection.save();
+      author?.hot_collections.push(hotCollection);
+      await author?.save();
       listenToken(nft);
     }
   );

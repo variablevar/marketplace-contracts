@@ -3,6 +3,7 @@ node_modules
 # testing
 /.nyc_output
 .env
+accounts.env
 
 # Hardhat files
 /cache
@@ -19,3 +20,4 @@ node_modules
 # solidity-coverage files
 /coverage
 /coverage.json
+
