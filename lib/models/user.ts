@@ -13,7 +13,7 @@ export interface IUser extends Document {
   social: string;
   followers: IUser[];
   bids: IBid[];
-  author_sale: IAuthorSale;
+  author_sale?: IAuthorSale;
   about?: string;
   published_at?: Date;
   created_at?: Date;

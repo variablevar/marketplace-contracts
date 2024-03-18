@@ -39,6 +39,7 @@ export function listenFactory() {
         id: nft,
         author,
         name: name,
+        symbol,
         banner: image,
       });
       await collection.save();

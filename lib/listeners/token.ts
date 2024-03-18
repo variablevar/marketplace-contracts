@@ -1,7 +1,13 @@
 import axios from "axios";
 import { ethers } from "hardhat";
 import { NFT, NFT__factory } from "../../typechain-types";
-import { MetadataModel, NftModel, TokenModel, UserModel } from "../models";
+import {
+  HotCollectionModel,
+  MetadataModel,
+  NftModel,
+  TokenModel,
+  UserModel,
+} from "../models";
 import { ItemType, Status } from "../models/nft";
 import NFTCollectionModel from "../models/nft-collection";
 import { provider } from "./provider";
@@ -31,6 +37,9 @@ export function listenToken(address: string) {
         ...metadataJSON,
         tokenId: parseInt(tokenId.toString()),
       });
+      const hot_collections = await HotCollectionModel.findOne({
+        id: metadata.collection_address,
+      });
       const author = await UserModel.findOne({ wallet: creator });
       await TokenModel.create({
         address,
@@ -46,7 +55,7 @@ export function listenToken(address: string) {
         category: metadata.category,
         status: Status.None,
         item_type: ItemType.SingleItems,
-        collections: metadata.collection_name,
+        hot_collections,
         start: new Date(0),
         deadline: new Date(0),
         author_link: `/author/${creator}`,
@@ -62,6 +71,7 @@ export function listenToken(address: string) {
         views: 0,
         priceover: 0,
         author,
+        owner: author,
         showcase: false,
         preview_image: metadata.image,
       });

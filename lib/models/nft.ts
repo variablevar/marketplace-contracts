@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { IBid } from "./bid";
+import { IHotCollection } from "./hot-collection";
 import { IMetadata } from "./metadata";
 import { IUser } from "./user";
 
@@ -9,7 +10,7 @@ export interface INft extends Document {
   category: Category;
   status: Status;
   item_type: ItemType;
-  collections: string;
+  hot_collections: IHotCollection;
   start?: Date;
   deadline?: Date;
   author_link: string;
@@ -24,6 +25,7 @@ export interface INft extends Document {
   views: number;
   priceover?: number;
   author?: IUser;
+  owner?: IUser;
   showcase?: boolean;
   published_at: Date;
   created_at: Date;
@@ -75,8 +77,9 @@ export const NftSchema: Schema<INft> = new Schema({
   category: { type: String, enum: Object.values(Category), required: true },
   status: { type: String, enum: Object.values(Status), required: true },
   item_type: { type: String, enum: Object.values(ItemType), required: true },
-  collections: {
-    type: String,
+  hot_collections: {
+    type: Schema.Types.ObjectId,
+    ref: "HotCollection",
     required: true,
   },
   deadline: { type: Date },
@@ -95,6 +98,7 @@ export const NftSchema: Schema<INft> = new Schema({
   views: { type: Number, required: true },
   priceover: { type: Number },
   metadata: { type: Schema.Types.ObjectId, ref: "Metadata", required: true },
+  owner: { type: Schema.Types.ObjectId, ref: "User", required: true },
   author: { type: Schema.Types.ObjectId, ref: "User", required: true },
   showcase: { type: Boolean },
   published_at: {

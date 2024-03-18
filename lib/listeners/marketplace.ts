@@ -106,13 +106,15 @@ export function listenMarketplace() {
         {
           $set: {
             status: Status.None,
-            author: authorUser,
+            owner: authorUser,
             priceover: Number(price),
           },
           $push: { history: tx },
         }
       );
-      const updatedNFT = await NftModel.findOne({ id: `${nft}/${tokenId}` });
+      const updatedNFT = await NftModel.findOne({
+        id: `${nft}/${tokenId}`,
+      });
       if (authorUser && sellerUser && updatedNFT) {
         sellerUser.nfts.filter((nft) => nft.id === `${nft}/${tokenId}`);
         await sellerUser.save();
@@ -234,7 +236,7 @@ export function listenMarketplace() {
           $set: {
             status: Status.None,
             priceover: Number(offerPrice),
-            author: authorUser,
+            owner: authorUser,
           },
           $push: { history: tx },
         }
@@ -380,7 +382,7 @@ export function listenMarketplace() {
             status: Status.OnAuction,
             priceover: Number(price),
             price: Number(price),
-            author: authorUser,
+            owner: authorUser,
           },
           $push: { history: tx },
           $inc: { bid: 1, max_bid: 1 },
