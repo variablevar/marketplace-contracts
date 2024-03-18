@@ -92,7 +92,7 @@ export function listenMarketplace() {
       await TokenModel.findOneAndUpdate(
         { address: nft, tokenId: Number(tokenId) },
         {
-          $set: { owner: buyer },
+          $set: { owner: buyer,price: Number(price)},
         }
       );
       const tx = await BidModel.create({
@@ -217,7 +217,7 @@ export function listenMarketplace() {
       await TokenModel.findOneAndUpdate(
         { address: nft, tokenId: Number(tokenId) },
         {
-          $set: { owner: offerer },
+          $set: { owner: offerer ,price: Number(offerPrice)},
         }
       );
 
@@ -274,6 +274,12 @@ export function listenMarketplace() {
         creator,
       });
       await createdAuction.save();
+      await TokenModel.findOneAndUpdate(
+        { address: nft, tokenId: Number(tokenId) },
+        {
+          $set: { owner: creator ,price: Number(price)},
+        }
+      );
       const author = await UserModel.findOne({ wallet: creator });
       const tx = await BidModel.create({
         value: Number(price),
@@ -314,6 +320,12 @@ export function listenMarketplace() {
         bidder,
       });
       await placedBid.save();
+      await TokenModel.findOneAndUpdate(
+        { address: nft, tokenId: Number(tokenId) },
+        {
+          $set: { price: Number(bidPrice)},
+        }
+      );
 
       const author = await UserModel.findOne({ wallet: bidder });
       const tx = await BidModel.create({
@@ -363,7 +375,7 @@ export function listenMarketplace() {
       await TokenModel.findOneAndUpdate(
         { address: nft, tokenId: Number(tokenId) },
         {
-          $set: { owner: winner },
+          $set: { owner: winner ,price: Number(price) },
         }
       );
       const authorUser = await UserModel.findOne({ wallet: winner });

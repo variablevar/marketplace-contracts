@@ -40,6 +40,7 @@ export function listenFactory() {
         author,
         name: name,
         symbol,
+        owner: creator,
         banner: image,
       });
       await collection.save();

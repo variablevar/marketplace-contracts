@@ -39,6 +39,7 @@ export function listenToken(address: string) {
       });
       const hot_collections = await HotCollectionModel.findOne({
         id: metadata.collection_address,
+
       });
       const author = await UserModel.findOne({ wallet: creator });
       await TokenModel.create({

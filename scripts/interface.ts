@@ -78,7 +78,19 @@ async function createCollection(
     console.log(error);
   }
 }
-async function getTokenURI(metadata: IMetadata, imageFile: ImageFile) {}
+async function getTokenURI(metadata: IMetadata, imageFile: ImageFile,
+  collectionInfo: CollectionInfo,address: string
+  ) {
+  metadata.image = imageFile.pinataUrl;
+  metadata.animation_url = imageFile.pinataUrl ;
+  metadata.external_url = imageFile.pinataUrl ;
+
+  metadata.collection_name = collectionInfo.collectionName ;
+  metadata.collection_address = address;
+
+
+}
+
 async function createToken(
   collectionInfo: CollectionInfo,
   signer: Signer,

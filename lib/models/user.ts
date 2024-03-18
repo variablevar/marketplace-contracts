@@ -11,7 +11,7 @@ export interface IUser extends Document {
   email: string;
   wallet: string;
   social: string;
-  followers: IUser[];
+  followers: string[];
   bids: IBid[];
   author_sale?: IAuthorSale;
   about?: string;
@@ -32,7 +32,7 @@ export const UserSchema: Schema<IUser> = new Schema({
   wallet: { type: String, default: "" },
   social: { type: String, default: "" },
   followers: {
-    type: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    type: [{ type: String}],
     default: [],
   },
   bids: {
