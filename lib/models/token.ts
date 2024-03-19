@@ -1,5 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { IMetadata } from "./metadata";
+import { Status } from "./nft";
 
 // Define interface for Token document
 export interface IToken extends Document {
@@ -9,6 +10,7 @@ export interface IToken extends Document {
   creator: string;
   tokenURI: string;
   price: number;
+  status:Status;
   metadata: IMetadata;
 }
 
@@ -17,6 +19,7 @@ const TokenSchema: Schema<IToken> = new Schema({
   address: { type: String, required: true },
   creator: { type: String, required: true },
   owner: { type: String, required: true },
+  status: { type: String, enum: Object.values(Status), required: true },
   tokenId: { type: Number, required: true },
   metadata: { type: Schema.Types.ObjectId, ref: "Metadata", required: true },
   tokenURI: { type: String, required: true },

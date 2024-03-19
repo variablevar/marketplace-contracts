@@ -45,9 +45,10 @@ export function listenToken(address: string) {
         await TokenModel.create({
           address,
           creator,
+          status: Status.None,
           owner: creator,
           tokenURI,
-          tokenId: parseInt(tokenId.toString()),
+          tokenId: Number(tokenId),
           metadata: metadata,
         });
         const nft = await NftModel.create({
@@ -79,7 +80,7 @@ export function listenToken(address: string) {
         author?.nfts.push(nft);
 
         console.log(
-          `TOKEN MINTED AT ${nft} WITH TOKEN ID ${tokenId} AND TOKEN URI ${tokenURI}`
+          `TOKEN MINTED AT ${address} WITH TOKEN ID ${tokenId} AND TOKEN URI ${tokenURI}`
         );
       } catch (error) {
         console.log(
