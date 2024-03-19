@@ -82,6 +82,7 @@ export const NftSchema: Schema<INft> = new Schema({
     ref: "HotCollection",
     required: true,
   },
+  start: { type: Date },
   deadline: { type: Date },
   author_link: {
     type: String,

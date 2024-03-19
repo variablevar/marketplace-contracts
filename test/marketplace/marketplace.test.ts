@@ -167,7 +167,7 @@ describe("INTEGRATION", () => {
           expect(NFT_TOKENS_URI).to.include(tokenURI);
           expect(NFT_TOKENS).to.include(tokenId);
         }
-      );    
+      );
 
       for (let index = 0; index < 10; index++) {
         const tx = await nft
@@ -390,7 +390,7 @@ describe("INTEGRATION", () => {
 
         const tx = await marketplace
           .connect(offerer)
-          .offerNFT(NFT_ADDRESS, TOKEN_ID,  OFFER_PRICE );
+          .offerNFT(NFT_ADDRESS, TOKEN_ID, OFFER_PRICE);
 
         await tx.wait();
       });
@@ -460,7 +460,7 @@ describe("INTEGRATION", () => {
 
         const tx = await marketplace
           .connect(offerer)
-          .offerNFT(NFT_ADDRESS, TOKEN_ID,  OFFER_PRICE );
+          .offerNFT(NFT_ADDRESS, TOKEN_ID, OFFER_PRICE);
 
         await tx.wait();
       });
@@ -470,8 +470,8 @@ describe("INTEGRATION", () => {
       let CREATOR_ADDRESS: string;
       let BIDDER_1_ADDRESS: string;
       let BIDDER_2_ADDRESS: string;
-      let AUCTION_START_TIME = Date.now() / 1000 + 60;
-      let AUCTION_END_TIME = Date.now() / 1000 + 600;
+      let AUCTION_START_TIME = parseInt(`${Date.now() / 1000 + 60}`);
+      let AUCTION_END_TIME = parseInt(`${Date.now() / 1000 + 600}`);
 
       const TOKEN_ID = 7;
       const TOKEN_PRICE = NFT_PRICES[TOKEN_ID];
@@ -484,7 +484,7 @@ describe("INTEGRATION", () => {
         BIDDER_2_ADDRESS = await bidder2.getAddress();
       });
 
-      xit("IT SHOULD ALLOW USER TO START AUCTION", async () => {
+      it("IT SHOULD ALLOW USER TO START AUCTION", async () => {
         const EVENT_NAME = "CreatedAuction";
         const event = marketplace.getEvent(EVENT_NAME);
         marketplace.on(

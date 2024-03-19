@@ -11,7 +11,6 @@
     "build": "tsc",
     "deploy": "npx hardhat run scripts/deploy.ts --network ganache",
     "build:typechain": "npx hardhat typechain",
-    "build:interface": "npx hardhat run scripts/interface.ts --network ganache",
     "test": "nyc mocha -r ts-node/register test/marketplace/**.test.ts --timeout 600000 --exit"
   },
   "author": "variable",
