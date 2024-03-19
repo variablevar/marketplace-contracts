@@ -30,53 +30,66 @@ export function listenToken(address: string) {
   token.on(
     event,
     async function (creator: string, tokenURI: string, tokenId: bigint, args) {
-      const response = await axios.get(tokenURI);
-      const metadataJSON = response.data;
+      try {
+        const response = await axios.get(tokenURI);
+        const metadataJSON = response.data;
 
-      const metadata = await MetadataModel.create({
-        ...metadataJSON,
-        tokenId: parseInt(tokenId.toString()),
-      });
-      const hot_collections = await HotCollectionModel.findOne({
-        id: metadata.collection_address,
+        const metadata = await MetadataModel.create({
+          ...metadataJSON,
+          tokenId: parseInt(tokenId.toString()),
+        });
+        const hot_collections = await HotCollectionModel.findOne({
+          id: metadata.collection_address,
+        });
+        const author = await UserModel.findOne({ wallet: creator });
+        await TokenModel.create({
+          address,
+          creator,
+          owner: creator,
+          tokenURI,
+          tokenId: parseInt(tokenId.toString()),
+          metadata: metadata,
+        });
+        const nft = await NftModel.create({
+          id: `${address}/${tokenId}`,
+          tokenId: metadata.tokenId,
+          category: metadata.category,
+          status: Status.None,
+          item_type: ItemType.SingleItems,
+          hot_collections,
+          start: new Date(0),
+          deadline: new Date(0),
+          author_link: `/author/${creator}`,
+          nft_link: `/item-detail/${address}/${tokenId}`,
+          bid_link: `/item-detail/${address}/${tokenId}`,
+          title: metadata.name,
+          metadata: metadata,
+          price: 0,
+          bid: 0,
+          max_bid: 0,
+          likes: 0,
+          description: metadata.description,
+          views: 0,
+          priceover: 0,
+          author,
+          owner: author,
+          showcase: false,
+          preview_image: metadata.image,
+        });
+        author?.nfts.push(nft);
 
-      });
-      const author = await UserModel.findOne({ wallet: creator });
-      await TokenModel.create({
-        address,
-        creator,
-        owner: creator,
-        tokenURI,
-        tokenId: parseInt(tokenId.toString()),
-        metadata: metadata,
-      });
-      const nft = await NftModel.create({
-        id: `${address}/${tokenId}`,
-        tokenId: metadata.tokenId,
-        category: metadata.category,
-        status: Status.None,
-        item_type: ItemType.SingleItems,
-        hot_collections,
-        start: new Date(0),
-        deadline: new Date(0),
-        author_link: `/author/${creator}`,
-        nft_link: `/item-detail/${address}/${tokenId}`,
-        bid_link: `/item-detail/${address}/${tokenId}`,
-        title: metadata.name,
-        metadata: metadata,
-        price: 0,
-        bid: 0,
-        max_bid: 0,
-        likes: 0,
-        description: metadata.description,
-        views: 0,
-        priceover: 0,
-        author,
-        owner: author,
-        showcase: false,
-        preview_image: metadata.image,
-      });
-      author?.nfts.push(nft);
+        console.log(
+          `TOKEN MINTED AT ${nft} WITH TOKEN ID ${tokenId} AND TOKEN URI ${tokenURI}`
+        );
+      } catch (error) {
+        console.log(
+          `Something went wrong when creating collection on database `,
+          creator,
+          tokenId,
+          tokenURI,
+          error
+        );
+      }
     }
   );
   console.log(`LISTENING START ON TOKEN AT ${address}`);

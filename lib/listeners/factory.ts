@@ -27,27 +27,40 @@ export function listenFactory() {
       symbol: string,
       args
     ) {
-      const collection = new NFTCollectionModel({
-        creator,
-        nft,
-        name,
-        image,
-        symbol,
-      });
-      const author = await UserModel.findOne({ wallet: creator });
-      const hotCollection = new HotCollectionModel({
-        id: nft,
-        author,
-        name: name,
-        symbol,
-        owner: creator,
-        banner: image,
-      });
-      await collection.save();
-      await hotCollection.save();
-      author?.hot_collections.push(hotCollection);
-      await author?.save();
-      listenToken(nft);
+      try {
+        const collection = new NFTCollectionModel({
+          creator,
+          nft,
+          name,
+          image,
+          symbol,
+        });
+
+        const author = await UserModel.findOne({ wallet: creator });
+        const hotCollection = new HotCollectionModel({
+          id: nft,
+          author,
+          name: name,
+          symbol,
+          owner: creator,
+          banner: image,
+        });
+        await collection.save();
+        await hotCollection.save();
+        author?.hot_collections.push(hotCollection);
+        await author?.save();
+        listenToken(nft);
+      } catch (error) {
+        console.log(
+          `Something went wrong when creating collection on database `,
+          creator,
+          nft,
+          name,
+          image,
+          symbol,
+          error
+        );
+      }
     }
   );
   console.log(`LISTENING START OF NFT FACTORY EVENTS AT ${FACTORY_ADDRESS}`);
