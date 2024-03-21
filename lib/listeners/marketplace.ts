@@ -321,8 +321,9 @@ export function listenMarketplace() {
             status: Status.OnAuction,
             priceover: Number(price),
             price: Number(price),
-            start: Number(startTime),
-            deadline: Number(endTime),
+            max_bid : Number(price+minBid),
+            start: new Date(Number(startTime) * 1000),
+            deadline: new Date(Number(endTime)*1000),
           },
           $push: { history: tx },
         }
@@ -342,8 +343,8 @@ export function listenMarketplace() {
     ) {
       const placedBid = new PlacedBidModel({
         nft,
-        tokenId,
-        bidPrice,
+        tokenId:Number(tokenId),
+        bidPrice:Number(bidPrice),
         bidder,
       });
       await placedBid.save();
@@ -368,10 +369,11 @@ export function listenMarketplace() {
           $set: {
             status: Status.OnAuction,
             priceover: Number(bidPrice),
+            max_bid : Number(bidPrice),
             price: Number(bidPrice),
           },
-          $push: { history: tx },
-          $inc: { bid: 1, max_bid: 1 },
+          $push: { history: tx ,bids:tx},
+          $inc: { bid: 1 },
         }
       );
       author?.save();
@@ -392,10 +394,10 @@ export function listenMarketplace() {
     ) {
       const resultedAuction = new ResultedAuctionModel({
         nft,
-        tokenId,
+        tokenId:Number(tokenId),
         creator,
         winner,
-        price,
+        price:Number(price),
         caller,
       });
       await resultedAuction.save();
@@ -420,11 +422,12 @@ export function listenMarketplace() {
           $set: {
             status: Status.OnAuction,
             priceover: Number(price),
+            max_bid:Number(price),
             price: Number(price),
             owner: authorUser,
           },
           $push: { history: tx },
-          $inc: { bid: 1, max_bid: 1 },
+          $inc: { bid: 1 },
         }
       );
       const updatedNFT = await NftModel.findOne({ id: `${nft}/${tokenId}` });
