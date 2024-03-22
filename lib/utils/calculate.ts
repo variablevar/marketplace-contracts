@@ -1,13 +1,12 @@
 import { ObjectId } from "mongoose";
 import { BidModel, NftModel } from "../models";
-import { IUser } from "../models/user";
 
 export async function calculateFloorPricePerUser(
-  owner: IUser
-): Promise<any> {
+  owner: ObjectId
+): Promise<number> {
   const aggregationResult = await NftModel.aggregate([
     {
-      $match: { owner:'65f4ff92100e1f8f156dc5e5' }, // Filter tokens by author
+      $match: { owner }, // Filter tokens by author
     },
     {
       $group: {
@@ -16,12 +15,12 @@ export async function calculateFloorPricePerUser(
       },
     },
   ]);
-  return aggregationResult;
+  return aggregationResult[0]?.averagePrice || 0;
 }
 
 export async function calculateDailySalesPerUser(
-  author: IUser
-): Promise<any> {
+  author: ObjectId
+): Promise<number> {
   const today = new Date();
   const startOfDay = new Date(
     today.getFullYear(),
@@ -44,12 +43,12 @@ export async function calculateDailySalesPerUser(
     },
   ]);
 
-  return aggregationResult;
+  return aggregationResult[0]?.totalValue || 0;
 }
 
 export async function calculateWeeklySalesPerUser(
-  author: IUser
-): Promise<any> {
+  author: ObjectId
+): Promise<number> {
   const today = new Date();
   const startOfWeek = new Date(
     today.getFullYear(),
@@ -77,5 +76,5 @@ export async function calculateWeeklySalesPerUser(
     },
   ]);
 
-  return aggregationResult;
+  return aggregationResult[0]?.totalValue || 0;
 }

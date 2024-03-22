@@ -2,6 +2,7 @@ import axios from "axios";
 import { ethers } from "hardhat";
 import { NFT, NFT__factory } from "../../typechain-types";
 import {
+  AuthorSaleModel,
   HotCollectionModel,
   MetadataModel,
   NftModel,
@@ -77,9 +78,19 @@ export function listenToken(address: string) {
           showcase: false,
           preview_image: metadata.image,
         });
-        author?.nfts.push(nft);
-
-        await author?.save();
+        if (author) {
+          author.nfts.push(nft);
+          await AuthorSaleModel.findByIdAndUpdate(author.author_sale, {
+            $inc: {
+              owners: 1,
+              assets: 1,
+            },
+            $set: {
+              updated_at: Date.now(),
+            },
+          });
+          await author.save();
+        }
         console.log(
           `TOKEN MINTED AT ${address} WITH TOKEN ID ${tokenId} AND TOKEN URI ${tokenURI}`
         );
