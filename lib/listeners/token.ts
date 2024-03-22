@@ -79,6 +79,7 @@ export function listenToken(address: string) {
         });
         author?.nfts.push(nft);
 
+        await author?.save();
         console.log(
           `TOKEN MINTED AT ${address} WITH TOKEN ID ${tokenId} AND TOKEN URI ${tokenURI}`
         );
