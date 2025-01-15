@@ -1,4 +1,3 @@
-````markdown
 # Web3 NFT Marketplace Event Listener Monorepo
 
 This monorepo contains a Web3-based application designed to listen to events from an Ethereum-based NFT marketplace and manage the corresponding data in MongoDB.
@@ -162,7 +161,3 @@ This command uses Hardhat to deploy contracts as defined in the `scripts/deploy.
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-```
-
-```
