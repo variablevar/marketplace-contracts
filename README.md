@@ -22,7 +22,6 @@ Make sure ur using node v18
    git clone https://github.com/variablevar/marketplace-contracts.git
    cd marketplace-contracts
    ```
-````
 
 2. **Install dependencies**:
 
