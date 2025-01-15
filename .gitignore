@@ -20,4 +20,3 @@ accounts.env
 # solidity-coverage files
 /coverage
 /coverage.json
-
