@@ -8,13 +8,9 @@ import {
 
 describe("CALCULATION AGGREGATION TEST", () => {
   before(async () => {
-    await mongoose.connect(
-      process.env.MONGO_URL ||
-        "mongodb+srv://master:IzESsNqL7eFrppUf@cluster0.6pg8i.mongodb.net",
-      {
-        dbName: "marketplace",
-      }
-    );
+    await mongoose.connect(process.env.MONGO_URL!, {
+      dbName: "marketplace",
+    });
   });
   it("IT SHOULD CALCULATE FLOOR PRICE OF NFT WISE OF USER", async () => {
     const users = await UserModel.find();
